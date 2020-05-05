@@ -53,14 +53,14 @@ data class MovieDetails(
     @SerialName("production_status")
     val productionStatus: ProductionStatus,
     @SerialName("production_companies")
-    val productionCompanies : List<CompanyInfo> = emptyList(),
+    val productionCompanies : List<Company> = emptyList(),
     @SerialName("production_countries")
     val productionCountries : List<CountryCode> = emptyList(),
 
     @SerialName("cast")
-    val cast: List<CastInfo>,
+    val cast: List<Cast>,
     @SerialName("crew")
-    val crew: List<CrewInfo>,
+    val crew: List<Crew>,
 
     @SerialName("popularity")
     val popularity: Float,
@@ -135,7 +135,7 @@ enum class ProductionStatus(val status: String) {
 }
 
 @Serializable
-data class CastInfo(
+data class Cast(
     @SerialName("actor_urn")
     val urn: Urn,
     @SerialName("character")
@@ -145,7 +145,7 @@ data class CastInfo(
 )
 
 @Serializable
-data class CrewInfo(
+data class Crew(
     @SerialName("crew_urn")
     val urn: Urn,
     @SerialName("job_role")
@@ -155,7 +155,7 @@ data class CrewInfo(
 )
 
 @Serializable
-data class CompanyInfo(
+data class Company(
     @SerialName("company_urn")
     val urn: Urn
 )
@@ -164,6 +164,8 @@ data class CompanyInfo(
 data class Release(
     @SerialName("date")
     val date: LocalDate,
+    @SerialName("language")
+    val language: LanguageCode,
     @SerialName("certification")
     val certification: Certification,
     @SerialName("release_type")
