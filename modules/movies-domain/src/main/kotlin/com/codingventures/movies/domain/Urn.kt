@@ -6,6 +6,8 @@ data class Urn(
     val id: String
 ) {
     override fun toString() = "$org:$type:$id"
+
+    companion object
 }
 
 fun createMovieUrn(id: Int): Urn = Urn("cv", "movie","$id")
