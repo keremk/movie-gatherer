@@ -10,12 +10,14 @@
 rootProject.name = "movies"
 
 include(
+    ":modules:moviecmd",
     ":modules:movies-domain",
     ":modules:ingester",
     ":modules:movies-consumer",
     ":modules:people-consumer"
 )
 
+project(":modules:moviecmd").name = "moviecmd"
 project(":modules:movies-domain").name = "movies-domain"
 project(":modules:ingester").name = "ingester"
 project(":modules:movies-consumer").name = "movies-consumer"

@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+./gradlew --quiet :modules:moviecmd:installDist
+
+./modules/moviecmd/build/install/moviecmd/bin/moviecmd "$@"
