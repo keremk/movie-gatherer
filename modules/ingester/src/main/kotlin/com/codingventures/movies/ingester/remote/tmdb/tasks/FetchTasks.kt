@@ -6,7 +6,7 @@ import com.codingventures.movies.ingester.reader.ServiceProvider
 import com.codingventures.movies.ingester.reader.TaskType
 
 fun popularMoviesFetchTask(page: Int) = FetchTask(
-    jobType = TaskType.MovieList,
+    taskType = TaskType.MovieList,
     serviceProvider = ServiceProvider.TMDB,
     endpoint = Endpoint(
         path = "3/discover/movie",
@@ -18,7 +18,7 @@ fun popularMoviesFetchTask(page: Int) = FetchTask(
 )
 
 fun movieDetailsFetchTask(id: String) = FetchTask(
-    jobType = TaskType.MovieDetails,
+    taskType = TaskType.MovieDetails,
     serviceProvider = ServiceProvider.TMDB,
     endpoint = Endpoint(
         path = "3/movie/$id",
@@ -27,7 +27,7 @@ fun movieDetailsFetchTask(id: String) = FetchTask(
 )
 
 fun personDetailsFetchTask(id: String) = FetchTask(
-    jobType = TaskType.PersonDetails,
+    taskType = TaskType.PersonDetails,
     serviceProvider = ServiceProvider.TMDB,
     endpoint = Endpoint(
         path = "3/person/$id",

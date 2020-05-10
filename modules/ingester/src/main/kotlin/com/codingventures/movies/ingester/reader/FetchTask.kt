@@ -5,8 +5,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class FetchTask(
-    @SerialName("job_type")
-    val jobType: TaskType,
+    @SerialName("task_type")
+    val taskType: TaskType,
     @SerialName("service_provider")
     val serviceProvider: ServiceProvider,
     @SerialName("endpoint")

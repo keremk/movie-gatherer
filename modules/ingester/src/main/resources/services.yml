@@ -1,0 +1,3 @@
+tmdbConfig:
+  host: api.themoviedb.org
+  apiKey: ${TMDB_APIKEY}

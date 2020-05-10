@@ -24,4 +24,7 @@ dependencies {
     implementation("org.apache.kafka:kafka-clients:$kafkaVersion")
     implementation("io.github.microutils:kotlin-logging:$kotlinLogVersion")
     implementation("org.slf4j:slf4j-simple:$simpleLogVersion")
+
+    testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
+    testImplementation("io.ktor:ktor-client-mock-jvm:$ktorVersion")
 }
