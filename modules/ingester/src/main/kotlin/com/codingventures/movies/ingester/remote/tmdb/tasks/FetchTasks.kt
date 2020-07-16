@@ -1,9 +1,9 @@
 package com.codingventures.movies.ingester.remote.tmdb.tasks
 
-import com.codingventures.movies.ingester.reader.Endpoint
-import com.codingventures.movies.ingester.reader.FetchTask
-import com.codingventures.movies.ingester.reader.ServiceProvider
-import com.codingventures.movies.ingester.reader.TaskType
+import com.codingventures.movies.domain.Endpoint
+import com.codingventures.movies.domain.FetchTask
+import com.codingventures.movies.domain.ServiceProvider
+import com.codingventures.movies.domain.TaskType
 
 fun popularMoviesFetchTask(page: Int) = FetchTask(
     taskType = TaskType.MovieList,

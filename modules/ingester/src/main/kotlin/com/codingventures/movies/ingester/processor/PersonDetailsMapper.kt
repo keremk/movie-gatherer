@@ -20,7 +20,7 @@ fun mapPersonResponseToPersonDetails(response: PersonDetailsResponse): PersonDet
         alsoKnownAs = response.alsoKnownAs,
         gender = mapGender(response.gender),
         biography = response.biography,
-        popularity = response.popularity,
+        popularity = response.popularity.toDouble(),
         placeOfBirth = response.placeOfBirth?.let { it },
         profilePicturePath = response.profilePath,
         homepage = response.homepage,

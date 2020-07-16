@@ -43,7 +43,7 @@ fun mapMovieResponseToMovieDetails(response: MovieDetailsResponse): MovieDetails
         crew = mapCrew(response.credits),
         cast = mapCast(response.credits),
 
-        popularity = response.popularity,
+        popularity = response.popularity.toDouble(),
         voteAverage = response.voteAverage,
         voteCount = response.voteCount
     )

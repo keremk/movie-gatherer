@@ -1,5 +1,6 @@
 package com.codingventures.movies.ingester.remote.tmdb.fetchers
 
+import com.codingventures.movies.ingester.remote.tmdb.config.RemoteConfigProvider
 import com.codingventures.movies.ingester.remote.tmdb.response.MovieDetails
 import com.codingventures.movies.ingester.remote.tmdb.response.MovieList
 import com.codingventures.movies.ingester.remote.tmdb.response.MovieReference
@@ -27,8 +28,13 @@ import kotlinx.serialization.json.JsonConfiguration
 import kotlinx.serialization.json.JsonDecodingException
 
 class TmdbClientTests : ShouldSpec() {
-    val config = TmdbConfig(apiKey = "Test123", host = "example.com")
-    val httpClient = HttpClient(MockEngine) {
+    private val config = RemoteConfigProvider(
+        apiKey = "1234",
+        host = "example.com/api",
+        port = null,
+        https = true
+    )
+    private val httpClient = HttpClient(MockEngine) {
         engine {
             addHandler { request ->
                 val path = request.url.encodedPath
@@ -40,7 +46,7 @@ class TmdbClientTests : ShouldSpec() {
                     respond(mockMovieDetails, headers = mockHeaders)
                 } else if (path.contains("3/invalid")) {
                     respondBadRequest()
-                } else if (path.contains("3/unexpected")){
+                } else if (path.contains("3/unexpected")) {
                     respond(mockUnexpectedMovieDetails, headers = mockHeaders)
                 } else if (path.contains("3/missingfields")) {
                     respond(mockMissingFields, headers = mockHeaders)
@@ -58,8 +64,8 @@ class TmdbClientTests : ShouldSpec() {
 
     init {
         should("return movie list") {
-            val tmdbClient = TmdbClient(httpClient, config, popularMoviesFetchTask(1))
-            val result = tmdbClient.fetchData()
+            val tmdbClient = TmdbClient(httpClient, config)
+            val result = tmdbClient.fetchData(popularMoviesFetchTask(1))
             result should beOfType<MovieList>()
             val movieList = result as MovieList
             movieList.page shouldBe 1
@@ -68,38 +74,38 @@ class TmdbClientTests : ShouldSpec() {
             movieList.results[0] should beOfType<MovieReference>()
             movieList.results[0].id shouldBe 419704
         }
-        should ("return movie details") {
-            val tmdbClient = TmdbClient(httpClient, config, movieDetailsFetchTask("12345"))
-            val result = tmdbClient.fetchData()
+        should("return movie details") {
+            val tmdbClient = TmdbClient(httpClient, config)
+            val result = tmdbClient.fetchData(movieDetailsFetchTask("12345"))
             result should beOfType<MovieDetails>()
             val movieDetails = result as MovieDetails
             movieDetails.title shouldBe "Spenser Confidential"
         }
         should("return person details") {
-            val tmdbClient = TmdbClient(httpClient, config, personDetailsFetchTask("12345"))
-            val result = tmdbClient.fetchData()
+            val tmdbClient = TmdbClient(httpClient, config)
+            val result = tmdbClient.fetchData(personDetailsFetchTask("12345"))
             result should beOfType<PersonDetails>()
             val personDetails = result as PersonDetails
             personDetails.name shouldBe "Charlton Heston"
         }
-        should ("raise exception if some required fields are missing") {
-            val tmdbClient = TmdbClient(httpClient, config, mockMissingFieldsTask)
+        should("raise exception if some required fields are missing") {
+            val tmdbClient = TmdbClient(httpClient, config)
             val exception = shouldThrow<MissingFieldException> {
-                tmdbClient.fetchData()
+                tmdbClient.fetchData(mockMissingFieldsTask)
             }
             exception.message shouldContain "Field 'original_language' is required, but it was missing"
         }
         should("raise an exception for a bad request") {
-            val tmdbClient = TmdbClient(httpClient, config, mockBadRequestTask)
+            val tmdbClient = TmdbClient(httpClient, config)
             val exception = shouldThrow<ClientRequestException> {
-                tmdbClient.fetchData()
+                tmdbClient.fetchData(mockBadRequestTask)
             }
             exception.response.status shouldBe HttpStatusCode.BadRequest
         }
         should("raise an exception for unexpected response format") {
-            val tmdbClient = TmdbClient(httpClient, config, mockUnexpectedResponseTask)
+            val tmdbClient = TmdbClient(httpClient, config)
             val exception = shouldThrow<JsonDecodingException> {
-                tmdbClient.fetchData()
+                tmdbClient.fetchData(mockUnexpectedResponseTask)
             }
             exception.message shouldContain "Unexpected JSON token at offset 12"
         }

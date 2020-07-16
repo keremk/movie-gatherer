@@ -1,7 +1,7 @@
 package com.codingventures.movies.ingester.processor
 
 import com.codingventures.movies.domain.MovieIndustryData
-import com.codingventures.movies.ingester.reader.FetchTask
+import com.codingventures.movies.domain.FetchTask
 import com.codingventures.movies.ingester.remote.tmdb.response.MovieDetails as MovieDetailsResponse
 import com.codingventures.movies.ingester.remote.tmdb.response.MovieList as MovieListResponse
 import com.codingventures.movies.ingester.remote.tmdb.response.Cast as CastResponse
@@ -11,12 +11,23 @@ import com.codingventures.movies.ingester.remote.tmdb.response.TmdbResponse
 import com.codingventures.movies.ingester.remote.tmdb.tasks.movieDetailsFetchTask
 import com.codingventures.movies.ingester.remote.tmdb.tasks.personDetailsFetchTask
 import com.codingventures.movies.ingester.remote.tmdb.tasks.popularMoviesFetchTask
+import org.apache.avro.generic.GenericRecord
+import org.apache.kafka.clients.consumer.ConsumerRecord
+
+data class ResponseProcessorException(
+    val response: TmdbResponse,
+    val inner: Exception
+): Exception()
 
 fun processResponse(response: TmdbResponse): Pair<MovieIndustryData?, List<FetchTask>> {
-    return when (response) {
-        is MovieListResponse -> processMovieList(response)
-        is MovieDetailsResponse -> processMovieDetails(response)
-        is PersonDetailsResponse -> processPersonDetails(response)
+    try {
+        return when (response) {
+            is MovieListResponse -> processMovieList(response)
+            is MovieDetailsResponse -> processMovieDetails(response)
+            is PersonDetailsResponse -> processPersonDetails(response)
+        }
+    } catch (e: Exception) {
+        throw ResponseProcessorException(response, e)
     }
 }
 

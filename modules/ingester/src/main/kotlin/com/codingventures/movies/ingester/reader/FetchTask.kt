@@ -1,33 +1,19 @@
 package com.codingventures.movies.ingester.reader
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import com.codingventures.movies.domain.FetchTask
+import com.sksamuel.avro4k.Avro
+import org.apache.avro.generic.GenericRecord
+import org.apache.kafka.clients.consumer.ConsumerRecord
 
-@Serializable
-data class FetchTask(
-    @SerialName("task_type")
-    val taskType: TaskType,
-    @SerialName("service_provider")
-    val serviceProvider: ServiceProvider,
-    @SerialName("endpoint")
-    val endpoint: Endpoint
-)
+data class RecordDeserializationException(
+    val record: ConsumerRecord<String, GenericRecord>,
+    val inner: Exception
+): Exception()
 
-@Serializable
-enum class TaskType {
-    MovieList,
-    MovieDetails,
-    PersonDetails
+fun fetchTaskFromRecord(record: ConsumerRecord<String, GenericRecord>): FetchTask {
+    try {
+        return Avro.default.fromRecord(FetchTask.serializer(), record.value())
+    } catch (e: Exception) {
+        throw RecordDeserializationException(record = record, inner = e)
+    }
 }
-
-@Serializable
-enum class ServiceProvider {
-    TMDB
-}
-
-@Serializable
-data class Endpoint(
-    val path: String,
-    val params: Map<String, List<String>> = emptyMap()
-)
-
