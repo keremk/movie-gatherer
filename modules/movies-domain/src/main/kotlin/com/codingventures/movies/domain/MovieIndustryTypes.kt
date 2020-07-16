@@ -63,7 +63,7 @@ data class MovieDetails(
     val crew: List<Crew>,
 
     @SerialName("popularity")
-    val popularity: Float,
+    val popularity: Double,
     @SerialName("vote_average")
     val voteAverage: Double,
     @SerialName("vote_count")
@@ -95,7 +95,7 @@ data class PersonDetails(
     @SerialName("biography")
     val biography: String,
     @SerialName("popularity")
-    val popularity: Float,
+    val popularity: Double,
     @SerialName("place_of_birth")
     val placeOfBirth: String? = null,
     @SerialName("profile_picture_path")
