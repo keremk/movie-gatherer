@@ -6,12 +6,14 @@
  */
 import dependencies.kotlinLogVersion
 import dependencies.simpleLogVersion
-import dependencies.kotestVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import dependencies.kotestVersion
 
 plugins {
     kotlin("jvm") apply false
-    id("org.jetbrains.kotlin.plugin.serialization") apply false 
+    kotlin("kapt") version "1.3.72" apply false
+    id("org.jetbrains.kotlin.plugin.serialization") apply false
+//    id("com.google.cloud.tools.jib") apply false
 }
 
 allprojects {
@@ -22,6 +24,7 @@ allprojects {
         jcenter()
         mavenCentral()
         maven("http://packages.confluent.io/maven/")
+        maven("https://dl.bintray.com/arrow-kt/arrow-kt/")
     }
 }
 

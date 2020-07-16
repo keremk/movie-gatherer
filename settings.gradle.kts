@@ -14,7 +14,10 @@ include(
     ":modules:movies-domain",
     ":modules:ingester",
     ":modules:movies-consumer",
-    ":modules:people-consumer"
+    ":modules:people-consumer",
+    ":modules:kafka-common",
+    ":modules:ingester-integration-tests",
+    ":modules:tests-common"
 )
 
 project(":modules:moviecmd").name = "moviecmd"
@@ -22,6 +25,9 @@ project(":modules:movies-domain").name = "movies-domain"
 project(":modules:ingester").name = "ingester"
 project(":modules:movies-consumer").name = "movies-consumer"
 project(":modules:people-consumer").name = "people-consumer"
+project(":modules:kafka-common").name = "kafka-common"
+project(":modules:ingester-integration-tests").name = "ingester-integration-tests"
+project(":modules:tests-common").name = "tests-common"
 
 pluginManagement {
     val kotlinVersion: String by settings
