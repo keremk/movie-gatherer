@@ -38,7 +38,8 @@ class KafkaConfigProvider(
             ConsumerConfig.MAX_POLL_RECORDS_CONFIG to consumerSettings.maxPollRecords,
             ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG to consumerSettings.enableAutoCommit,
             ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "earliest",
-            ConsumerConfig.GROUP_ID_CONFIG to consumerSettings.consumerGroupId
+            ConsumerConfig.GROUP_ID_CONFIG to consumerSettings.consumerGroupId,
+            ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG to 30000
         )
     }
 

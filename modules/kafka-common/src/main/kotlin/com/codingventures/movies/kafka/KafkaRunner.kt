@@ -17,7 +17,7 @@ class KafkaRunner(
 ) {
     suspend fun run(topics: List<String>,
                     recordsConsumed: Channel<ConsumerRecords<String, GenericRecord>>,
-                    recordsToCommit: Channel<ConsumerRecords<String, GenericRecord>>? = null) = coroutineScope {
+                    recordsToCommit: Channel<Map<TopicPartition, OffsetAndMetadata>>? = null) = coroutineScope {
         try {
             if (!autoCommitEnabled && recordsToCommit == null) {
                 throw IllegalArgumentException("If autocommit is disabled, recordsToCommit cannot be null, please specify a valid channel")
@@ -26,14 +26,22 @@ class KafkaRunner(
             logger.debug { "Listening to topics $topics" }
             while (isActive) {
                 val records = kafkaConsumer.poll(Duration.ofMillis(1000))
-                if (!records.isEmpty) {
-                    recordsConsumed.send(records)
-                }
+                if (records.isEmpty) continue
+
+                logger.info { "Read ${records.count()} new records from Kafka with next offset = ${calculateNextOffsets(records)}" }
+                recordsConsumed.send(records)
                 if (!autoCommitEnabled) {
-                    val commitRecords = recordsToCommit?.receive()
-                    if (commitRecords != null) kafkaConsumer.commitSync(calculateNextOffsets(commitRecords))
+                    logger.info { "Auto commit not enabled, waiting for manual offsets" }
+                    val offsets = recordsToCommit?.receive()
+                    logger.info { "Received offsets = $offsets" }
+                    if (offsets != null) {
+                        kafkaConsumer.commitSync(offsets)
+                        offsets.forEach {
+                            kafkaConsumer.seek(it.key, it.value)
+                        }
+                    }
                 }
-            }
+           }
         } finally {
             kafkaConsumer.close()
         }

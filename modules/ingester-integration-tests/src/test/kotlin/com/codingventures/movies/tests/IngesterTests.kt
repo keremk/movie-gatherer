@@ -7,16 +7,21 @@ import com.codingventures.movies.ingester.pipeline.Pipeline
 import com.codingventures.movies.ingester.producer.Producers
 import com.codingventures.movies.ingester.producer.TaskProducer
 import com.codingventures.movies.ingester.remote.tmdb.config.RemoteConfigProvider
+import com.codingventures.movies.ingester.remote.tmdb.tasks.personDetailsFetchTask
 import io.kotest.core.spec.Spec
 import io.kotest.core.spec.style.ShouldSpec
 import com.codingventures.movies.ingester.remote.tmdb.fetchers.TmdbClient
-import com.codingventures.movies.ingester.remote.tmdb.tasks.personDetailsFetchTask
 import com.codingventures.movies.ingester.remote.tmdb.tasks.popularMoviesFetchTask
 import com.codingventures.movies.kafka.ConsumerSettings
 import com.codingventures.movies.kafka.KafkaConfigProvider
 import com.codingventures.movies.kafka.KafkaRunner
 import com.codingventures.movies.kafka.KafkaTopics
 import com.sksamuel.avro4k.Avro
+import io.kotest.assertions.throwables.shouldNotThrow
+import io.kotest.core.listeners.TestListener
+import io.kotest.core.spec.IsolationMode
+import io.kotest.core.spec.style.Test
+import io.kotest.core.test.TestCase
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.ktor.client.HttpClient
@@ -24,16 +29,49 @@ import io.ktor.client.engine.cio.CIO
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.features.json.serializer.KotlinxSerializer
 import io.ktor.util.KtorExperimentalAPI
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 import org.apache.avro.generic.GenericRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.clients.producer.KafkaProducer
+
+//class TestSetupListener: TestListener {
+//    private lateinit var remoteConfigProvider: RemoteConfigProvider
+//    private lateinit var sutRunner: Pipeline
+//    private lateinit var moviesListener: KafkaRunner
+//    private lateinit var peopleListener: KafkaRunner
+//    private lateinit var producers: Producers
+//
+//    private lateinit var
+//
+//    override suspend fun beforeTest(testCase: TestCase) = coroutineScope {
+//        super.beforeTest(testCase)
+//
+//        val sutJob = launch {
+//            sutRunner.run()
+//        }
+//        val moviesChannel = Channel<ConsumerRecords<String, GenericRecord>>()
+//        val moviesJob = launch(Dispatchers.IO) {
+//            moviesListener.run(listOf(kafkaTopics.movies), moviesChannel)
+//        }
+//        val peopleChannel = Channel<ConsumerRecords<String, GenericRecord>>()
+//        val peopleJob = launch(Dispatchers.IO) {
+//            peopleListener.run(listOf(kafkaTopics.people), peopleChannel)
+//        }
+//
+//    }
+//
+//
+//    @KtorExperimentalAPI
+//    override suspend fun beforeSpec(spec: Spec) {
+//        super.beforeSpec(spec)
+//        initalizeMockTmdbServer()
+//        initializeKafkaSystem()
+//    }
+//
+//}
 
 @KtorExperimentalAPI
 @ExperimentalCoroutinesApi
@@ -51,6 +89,8 @@ class IngesterTests : ShouldSpec() {
         tasks = "tasks"
     )
 
+    override fun isolationMode(): IsolationMode? = IsolationMode.InstancePerTest
+
     @KtorExperimentalAPI
     override fun beforeSpec(spec: Spec) {
         super.beforeSpec(spec)
@@ -58,10 +98,10 @@ class IngesterTests : ShouldSpec() {
         initializeKafkaSystem()
     }
 
-    override fun afterSpec(spec: Spec) {
-        super.afterSpec(spec)
+//    override fun afterSpec(spec: Spec) {
+//        super.afterSpec(spec)
 //        cleanupKafkaSystem()
-    }
+//    }
 
     @KtorExperimentalAPI
     private fun initalizeMockTmdbServer() {
@@ -111,7 +151,7 @@ class IngesterTests : ShouldSpec() {
             serverConfig = serverConfig,
             consumerSettings = ConsumerSettings(
                 enableAutoCommit = true,
-                maxPollRecords = 10,
+                maxPollRecords = 1, // IMPORTANT - otherwise test will not count entries correctly
                 consumerGroupId = "movies-listener"
             ),
             kafkaTopics = kafkaTopics
@@ -122,12 +162,74 @@ class IngesterTests : ShouldSpec() {
             serverConfig = serverConfig,
             consumerSettings = ConsumerSettings(
                 enableAutoCommit = true,
-                maxPollRecords = 10,
+                maxPollRecords = 1, // IMPORTANT - otherwise test will not count entries correctly
                 consumerGroupId = "people-listener"
             ),
             kafkaTopics = kafkaTopics
         )
         peopleListener = KafkaRunner.initialize(peopleListenerConfigProvider)
+    }
+
+    private suspend fun verifyPeopleList(
+        expectedPeople: Map<Urn, Pair<String, Int>>,
+        channel: Channel<ConsumerRecords<String, GenericRecord>>
+    ) {
+        val peopleCount = expectedPeople.values.fold(0) { acc, value ->
+            acc + value.second
+        }
+
+        shouldNotThrow<TimeoutCancellationException> {
+            withTimeout(30000L) {
+                // We need to make sure max.poll.records == 1 for the count to work
+                val occurances: Map<Urn, Pair<String, Int>> = (0 until peopleCount).fold(mutableMapOf()) { occurance, _ ->
+                    val records = channel.receive()
+                    records.forEach {
+                        val person = Avro.default.fromRecord(PersonDetails.serializer(), it.value())
+                        val currentCount = occurance.get(person.personUrn)?.second ?: 0
+                        val newCount = currentCount + 1
+                        occurance.apply { put(person.personUrn, Pair(person.name, newCount)) }
+                    }
+                    occurance
+                }
+                expectedPeople.forEach {
+                    val occuranceCount = occurances.get(it.key)
+                    occuranceCount shouldNotBe null
+                    occuranceCount?.first shouldBe it.value.first
+                    occuranceCount?.second shouldBe it.value.second
+                }
+            }
+        }
+    }
+
+    private suspend fun verifyMovieList(
+        expectedMovies: Map<Urn, Pair<String, Int>>,
+        moviesChannel: Channel<ConsumerRecords<String, GenericRecord>>
+    ) {
+        val movieCount = expectedMovies.values.fold(0) { acc, value ->
+            acc + value.second
+        }
+
+        shouldNotThrow<TimeoutCancellationException> {
+            withTimeout(30000L) {
+                val occurances: Map<Urn, Pair<String, Int>> =
+                    (0 until movieCount).fold(mutableMapOf()) { occurance, _ ->
+                        val records = moviesChannel.receive()
+                        records.forEach {
+                            val movie = Avro.default.fromRecord(MovieDetails.serializer(), it.value())
+                            val currentCount = occurance.get(movie.movieUrn)?.second ?: 0
+                            val newCount = currentCount + 1
+                            occurance.apply { put(movie.movieUrn, Pair(movie.title, newCount)) }
+                        }
+                        occurance
+                    }
+                expectedMovies.forEach {
+                    val occuranceCount = occurances.get(it.key)
+                    occuranceCount shouldNotBe null
+                    occuranceCount?.first shouldBe it.value.first
+                    occuranceCount?.second shouldBe it.value.second
+                }
+            }
+        }
     }
 
     private fun cleanupKafkaSystem() {
@@ -139,7 +241,7 @@ class IngesterTests : ShouldSpec() {
 
     init {
         should("Call the mock server") {
-            val fetchTask = personDetailsFetchTask("287")
+            val fetchTask = personDetailsFetchTask("2176")
             val tmdbClient = createTmdbClient(remoteConfigProvider)
             val response = tmdbClient.fetchData(fetchTask)
 
@@ -162,45 +264,55 @@ class IngesterTests : ShouldSpec() {
                 peopleListener.run(listOf(kafkaTopics.people), peopleChannel)
             }
 
-            val expectedMovies = listOf(
-                Pair(createMovieUrn(419704), "Ad Astra"),
-                Pair(createMovieUrn(475557), "Joker"),
-                Pair(createMovieUrn(496243), "Parasite"))
-            var i = 0
-            while (i < 3) {
-                val records = moviesChannel.receive()
+            val expectedMovies = mapOf(
+                createMovieUrn(419704) to Pair("Ad Astra", 1),
+                createMovieUrn(475557) to Pair("Joker", 1),
+                createMovieUrn(496243) to Pair("Parasite", 1))
+            verifyMovieList(expectedMovies, moviesChannel)
 
-                records.forEach {
-                    val movie = Avro.default.fromRecord(MovieDetails.serializer(), it.value())
-                    expectedMovies.contains(Pair(movie.movieUrn, movie.title)) shouldBe true
-                    i += 1
-                }
-            }
-
-            val expectedPeople = listOf(
-                Pair(createPersonUrn(287), "Brad Pitt"),
-                Pair(createPersonUrn(2176), "Tommy Lee Jones"),
-                Pair(createPersonUrn(17018), "Ruth Negga"),
-                Pair(createPersonUrn(20561),"James Gray"),
-                Pair(createPersonUrn(73421), "Joaquin Phoenix"),
-                Pair(createPersonUrn(1545693), "Zazie Beetz"),
-                Pair(createPersonUrn(57130), "Todd Phillips"),
-                Pair(createPersonUrn(20738), "Song Kang-ho"),
-                Pair(createPersonUrn(21684), "Bong Joon-ho")
+            val expectedPeople = mapOf(
+                createPersonUrn(287) to Pair("Brad Pitt", 2),
+                createPersonUrn(2176) to Pair("Tommy Lee Jones", 1),
+                createPersonUrn(17018) to Pair("Ruth Negga", 1),
+                createPersonUrn(20561) to Pair("James Gray", 2),
+                createPersonUrn(73421) to Pair("Joaquin Phoenix", 1),
+                createPersonUrn(1545693) to Pair("Zazie Beetz", 1),
+                createPersonUrn(57130) to Pair("Todd Phillips", 1),
+                createPersonUrn(20738) to Pair("Song Kang-ho", 1),
+                createPersonUrn(21684) to Pair("Bong Joon-ho", 2)
             )
-            i = 0
-            while (i < 9) {
-                val records = peopleChannel.receive()
-                records.forEach {
-                    val person = Avro.default.fromRecord(PersonDetails.serializer(), it.value())
-                    expectedPeople.contains(Pair(person.personUrn, person.name)) shouldBe true
-                    i += 1
-                }
-            }
+            verifyPeopleList(expectedPeople, peopleChannel)
 
             sutJob.cancel()
             moviesJob.cancel()
             peopleJob.cancel()
         }
+
+        should("Skip tasks if they fail while not losing other non-failing tasks") {
+            val fetchTask = popularMoviesFetchTask(3) // Page 3 is set to be failing
+            producers.produce(TaskProducer(listOf(fetchTask), kafkaTopics.tasks))
+
+            val sutJob = launch {
+                sutRunner.run()
+            }
+
+            val peopleChannel = Channel<ConsumerRecords<String, GenericRecord>>()
+            val peopleJob = launch(Dispatchers.IO) {
+                peopleListener.run(listOf(kafkaTopics.people), peopleChannel)
+            }
+
+            // Brad Pitt's profile will give error, so should not be in the list, but rest are here.
+            val expectedPeople = mapOf(
+                createPersonUrn(2176) to Pair("Tommy Lee Jones", 1),
+                createPersonUrn(17018) to Pair("Ruth Negga", 1),
+                createPersonUrn(20561) to Pair("James Gray", 2)
+            )
+            verifyPeopleList(expectedPeople, peopleChannel)
+
+            sutJob.cancel()
+            peopleJob.cancel()
+        }
     }
+
+
 }

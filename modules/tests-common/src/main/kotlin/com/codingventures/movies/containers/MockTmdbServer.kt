@@ -12,6 +12,13 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 private val logger = KotlinLogging.logger {}
 
+enum class DataSet {
+    FullHappyPath,
+    FailingFetchNonRetriable,
+    FailingFetchRetriable,
+    All
+}
+
 object MockTmdbServer {
     private val initalized = AtomicBoolean(false)
 
@@ -31,6 +38,14 @@ object MockTmdbServer {
             registerMovieListEndpoints()
             registerMovieDetailEndpoints()
             registerPersonDetailEndpoints()
+
+//            when (dataSet) {
+//                DataSet.FullHappyPath -> registerHappyPath()
+//                DataSet.FailingFetchNonRetriable -> registerNonRetriable()
+//                DataSet.FailingFetchRetriable -> registerRetriable()
+//                DataSet.All -> registerAll()
+//            }
+//
         }
 
         return tmdbServer
@@ -41,8 +56,30 @@ object MockTmdbServer {
         logger.debug { expectations }
     }
 
+//    private fun registerAll() {
+//        registerHappyPath()
+//    }
+//
+//    private fun registerHappyPath() {
+//        registerMovieListEndpoints()
+//        registerMovieDetailEndpoints()
+//        registerPersonDetailEndpoints()
+//    }
+//
+//    private fun registerNonRetriable() {
+//
+//    }
+//
+//    private fun registerRetriable() {
+//
+//    }
+//
     private fun registerMovieListEndpoints() {
-        val listPages = arrayOf(movieListPage1, movieListPage2)
+        val listPages = arrayOf(
+            movieListPage1,
+            movieListPage2,
+            movieListFailing
+        )
 
         listPages.forEachIndexed() { i, response ->
             client?.`when`(
@@ -66,7 +103,8 @@ object MockTmdbServer {
         val movies = mapOf(
             "419704" to movieAdAstra,
             "475557" to movieJoker,
-            "496243" to movieParasite
+            "496243" to movieParasite,
+            "55419704" to movieAdAstraFailing
         )
 
         movies.forEach { id, details ->
@@ -96,7 +134,8 @@ object MockTmdbServer {
             "1545693" to personZazie,
             "57130" to personTodd,
             "20738" to personSong,
-            "21684" to personBong
+            "21684" to personBong,
+            "5555287" to personBradFailing
         )
 
         people.forEach { id, details ->

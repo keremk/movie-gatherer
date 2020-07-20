@@ -1,9 +1,6 @@
 package com.codingventures.movies.ingester.producer
 
-import com.codingventures.movies.domain.MovieDetails
-import com.codingventures.movies.domain.MovieIndustryData
-import com.codingventures.movies.domain.PersonDetails
-import com.codingventures.movies.domain.FetchTask
+import com.codingventures.movies.domain.*
 import com.codingventures.movies.kafka.KafkaTopics
 import com.codingventures.movies.kafka.dispatchRecord
 import com.sksamuel.avro4k.Avro
@@ -17,7 +14,7 @@ import java.util.*
 private val logger = KotlinLogging.logger {}
 
 data class ResultsProductionException(
-    val resultPair: Pair<MovieIndustryData?, List<FetchTask>>,
+    val resultPair: ProductionTask,
     val inner: Exception
 ) : Exception()
 
@@ -32,10 +29,10 @@ class Producers(
         is TaskProducer -> input.produce(kafkaProducer, topics)
     }
 
-    suspend fun produceDataAndTasks(results: Pair<MovieIndustryData?, List<FetchTask>>, taskTopic: String) {
+    suspend fun produceDataAndTasks(results: ProductionTask, taskTopic: String) {
         try {
-            results.first?.also { produce(MovieIndustryDataProducer(it)) }
-            produce(TaskProducer(results.second, taskTopic))
+            results.movieIndustryData?.also { produce(MovieIndustryDataProducer(it)) }
+            produce(TaskProducer(results.additionalTasks, taskTopic))
         } catch (e: Exception) {
             throw ResultsProductionException(results, e)
         }
