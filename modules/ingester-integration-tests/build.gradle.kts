@@ -6,6 +6,7 @@ import dependencies.kotlinxSerializationVersion
 import dependencies.kafkaVersion
 import dependencies.avroSerializerVersion
 import dependencies.avro4kVersion
+import dependencies.kotestVersion
 
 dependencies {
     implementation(project(":modules:ingester"))
@@ -28,4 +29,5 @@ dependencies {
     testImplementation("org.testcontainers:postgresql:${testContainersVersion}")
     testImplementation("org.testcontainers:testcontainers:${testContainersVersion}")
     testImplementation("org.mock-server:mockserver-client-java:${mockServerVersion}")
+    testImplementation("io.kotest:kotest-runner-console-jvm:${kotestVersion}")
 }

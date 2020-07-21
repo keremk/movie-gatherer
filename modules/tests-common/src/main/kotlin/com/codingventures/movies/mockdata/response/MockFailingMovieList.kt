@@ -1,4 +1,4 @@
-package com.codingventures.movies.mockdata
+package com.codingventures.movies.mockdata.response
 
 val movieListFailing = """
     {

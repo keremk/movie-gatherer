@@ -1,4 +1,4 @@
-package com.codingventures.movies.ingester.data
+package com.codingventures.movies.mockdata.domain
 
 import com.codingventures.movies.domain.*
 import java.time.LocalDate

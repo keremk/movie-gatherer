@@ -271,15 +271,15 @@ class IngesterTests : ShouldSpec() {
             verifyMovieList(expectedMovies, moviesChannel)
 
             val expectedPeople = mapOf(
-                createPersonUrn(287) to Pair("Brad Pitt", 2),
+                createPersonUrn(287) to Pair("Brad Pitt", 1),
                 createPersonUrn(2176) to Pair("Tommy Lee Jones", 1),
                 createPersonUrn(17018) to Pair("Ruth Negga", 1),
-                createPersonUrn(20561) to Pair("James Gray", 2),
+                createPersonUrn(20561) to Pair("James Gray", 1),
                 createPersonUrn(73421) to Pair("Joaquin Phoenix", 1),
                 createPersonUrn(1545693) to Pair("Zazie Beetz", 1),
                 createPersonUrn(57130) to Pair("Todd Phillips", 1),
                 createPersonUrn(20738) to Pair("Song Kang-ho", 1),
-                createPersonUrn(21684) to Pair("Bong Joon-ho", 2)
+                createPersonUrn(21684) to Pair("Bong Joon-ho", 1)
             )
             verifyPeopleList(expectedPeople, peopleChannel)
 
@@ -305,7 +305,7 @@ class IngesterTests : ShouldSpec() {
             val expectedPeople = mapOf(
                 createPersonUrn(2176) to Pair("Tommy Lee Jones", 1),
                 createPersonUrn(17018) to Pair("Ruth Negga", 1),
-                createPersonUrn(20561) to Pair("James Gray", 2)
+                createPersonUrn(20561) to Pair("James Gray", 1)
             )
             verifyPeopleList(expectedPeople, peopleChannel)
 

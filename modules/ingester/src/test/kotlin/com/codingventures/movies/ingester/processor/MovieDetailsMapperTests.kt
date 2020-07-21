@@ -11,7 +11,7 @@ import io.kotest.matchers.shouldBe
 import java.time.LocalDate
 
 class MovieDetailsMapperTests : ShouldSpec() {
-    val releaseDates = ReleaseDates(
+    private val releaseDates = ReleaseDates(
         results = listOf(
             ReleasedCountry(countryName = "FR", releases = listOf(
                 ReleaseResponse(
@@ -48,7 +48,7 @@ class MovieDetailsMapperTests : ShouldSpec() {
                 )
             ))
     ))
-    val credits = Credits(
+    private val credits = Credits(
         cast = listOf(
             CastResponse(
                 castId = 0,

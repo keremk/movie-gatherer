@@ -6,6 +6,7 @@ import com.codingventures.movies.ingester.producer.ResultsProductionException
 import com.codingventures.movies.ingester.producer.TaskProducer
 import com.codingventures.movies.domain.FetchTask
 import com.codingventures.movies.domain.ProductionTask
+import com.codingventures.movies.ingester.config.PipelineConfigProvider
 import com.codingventures.movies.ingester.processor.ResponseProcessor
 import com.codingventures.movies.ingester.remote.tmdb.config.RemoteConfigProvider
 import com.codingventures.movies.ingester.remote.tmdb.fetchers.FetchOperationException
@@ -39,13 +40,6 @@ import org.apache.kafka.common.TopicPartition
 
 private val logger = KotlinLogging.logger {}
 
-data class ProcessingContext(
-    val kafkaProducer: Producer<String, GenericRecord>,
-    val kafkaConsumer: Consumer<String, GenericRecord>,
-    val remoteClient: RemoteClient,
-    val topics: KafkaTopics
-)
-
 enum class Reason {
     FetchTaskInvalidFailure,
     DataRetrievalFailure,
@@ -63,7 +57,10 @@ typealias InputRecord = ConsumerRecord<String, GenericRecord>
 
 class Pipeline(
     val kafkaRunner: KafkaRunner,
-    val ctx: ProcessingContext
+    val producers: Producers,
+    val remoteClient: RemoteClient,
+    val topics: KafkaTopics,
+    val responseProcessor: ResponseProcessor
 ) {
 
     @ExperimentalCoroutinesApi
@@ -85,7 +82,7 @@ class Pipeline(
 
     private suspend fun fetchData(input: Pair<FetchTask, InputRecord>): Pair<TmdbResponse, InputRecord> {
         try {
-            val data = ctx.remoteClient.fetchData(input.first)
+            val data = remoteClient.fetchData(input.first)
             return Pair(data, input.second)
         } catch (e: FetchOperationException) {
             throw PipelineStageException(Reason.DataRetrievalFailure, input.second, e)
@@ -94,7 +91,7 @@ class Pipeline(
 
     private fun processResponse(input: Pair<TmdbResponse, InputRecord>): Pair<ProductionTask, InputRecord> {
         try {
-            return Pair(ResponseProcessor.processResponse(input.first), input.second)
+            return Pair(responseProcessor.process(input.first), input.second)
         } catch (e: Exception) {
             throw PipelineStageException(Reason.ResponseProcessingFailure, input.second, e)
         }
@@ -102,7 +99,7 @@ class Pipeline(
 
     private suspend fun produceDataAndTasks(producers: Producers, input: Pair<ProductionTask, InputRecord>) {
         try {
-            producers.produceDataAndTasks(input.first, ctx.topics.tasks)
+            producers.produceDataAndTasks(input.first, topics.tasks)
         } catch (e: Exception) {
             throw PipelineStageException(Reason.PublishStageFailure, input.second, e)
         }
@@ -113,9 +110,8 @@ class Pipeline(
         val topicChannel = Channel<ConsumerRecords<String, GenericRecord>>()
         val commitRecordsChannel = Channel<Map<TopicPartition, OffsetAndMetadata>>()
         launch(Dispatchers.IO) {
-            kafkaRunner.run(listOf(ctx.topics.tasks), topicChannel, commitRecordsChannel)
+            kafkaRunner.run(listOf(topics.tasks), topicChannel, commitRecordsChannel)
         }
-        val producers = Producers(ctx.kafkaProducer, ctx.topics)
         while (isActive) {
             val records = topicChannel.receive()
             val offsets: Map<TopicPartition, OffsetAndMetadata> = records.partitions().fold(mutableMapOf()) { partitionToOffsets, partition ->
@@ -151,7 +147,7 @@ class Pipeline(
             logger.info { "Verify offsets ${offsets.entries}"}
             commitRecordsChannel.send(offsets)
         }
-        ctx.kafkaProducer.close()
+        producers.close()
     }
 
     private fun handleFetchTaskInvalidFailure(e: PipelineStageException) {
@@ -164,7 +160,7 @@ class Pipeline(
         }
 
         when (e.inner) {
-            is ServerResponseException -> producers.produce(TaskProducer(listOf(e.task), ctx.topics.deadLetters))
+            is ServerResponseException -> producers.produce(TaskProducer(listOf(e.task), topics.deadLetters))
             else -> logger.error { "Task ${e.task.endpoint.path} with params ${e.task.endpoint.params} did not succeed - ${e.inner.message}" }
         }
     }
@@ -196,7 +192,8 @@ class Pipeline(
     companion object {
         fun initialize(
             kafkaConfigProvider: KafkaConfigProvider = KafkaConfigProvider.default(),
-            remoteConfigProvider: RemoteConfigProvider = RemoteConfigProvider.default()
+            remoteConfigProvider: RemoteConfigProvider = RemoteConfigProvider.default(),
+            pipelineConfigProvider: PipelineConfigProvider = PipelineConfigProvider.default()
         ): Pipeline {
             val httpClient = HttpClient(CIO) {
                 install(JsonFeature) {
@@ -207,14 +204,19 @@ class Pipeline(
             }
             val tmdbClient = TmdbClient(httpClient, remoteConfigProvider)
             val kafkaRunner = KafkaRunner.initialize(kafkaConfigProvider)
+            val kafkaProducer = KafkaProducer<String, GenericRecord>(kafkaConfigProvider.producerProperties())
+            val producers = Producers(kafkaProducer, kafkaConfigProvider.kafkaTopics)
+            val responseProcessor = ResponseProcessor.initialize(
+                maxNoCrewRequests = pipelineConfigProvider.maxNoCrewRequests,
+                maxNoCastRequests = pipelineConfigProvider.maxNoCastRequests,
+                maxNoPages = pipelineConfigProvider.maxNoPages
+            )
             return Pipeline(
                 kafkaRunner = kafkaRunner,
-                ctx = ProcessingContext(
-                    kafkaProducer = KafkaProducer<String, GenericRecord>(kafkaConfigProvider.producerProperties()),
-                    kafkaConsumer = kafkaRunner.kafkaConsumer,
-                    remoteClient = tmdbClient,
-                    topics = kafkaConfigProvider.kafkaTopics
-                )
+                producers = producers,
+                remoteClient = tmdbClient,
+                topics = kafkaConfigProvider.kafkaTopics,
+                responseProcessor = responseProcessor
             )
         }
     }

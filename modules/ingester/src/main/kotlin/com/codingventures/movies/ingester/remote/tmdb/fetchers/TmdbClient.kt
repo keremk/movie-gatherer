@@ -27,7 +27,7 @@ data class FetchOperationException(
 ): Exception()
 
 class TmdbClient(override val httpClient: HttpClient, override val configuration: RemoteConfigProvider): RemoteClient {
-    suspend override fun fetchData(task: FetchTask): TmdbResponse  {
+    override suspend fun fetchData(task: FetchTask): TmdbResponse  {
         try {
             return when (task.taskType) {
                 TaskType.MovieList -> fetchMovieList(buildUrl(task))
@@ -48,18 +48,18 @@ class TmdbClient(override val httpClient: HttpClient, override val configuration
             parameters.append("api_key", configuration.apiKey)
         }
 
-    suspend private fun fetchMovieList(buildUrl: BuildUrl) =
+    private suspend fun fetchMovieList(buildUrl: BuildUrl) =
         httpClient.get<MovieList> {
             url(buildUrl)
         }
 
-    suspend private fun fetchMovieDetails(buildUrl: BuildUrl) =
+    private suspend fun fetchMovieDetails(buildUrl: BuildUrl) =
         httpClient.get<MovieDetails> {
             url(buildUrl)
         }
 
 
-    suspend private fun fetchPersonDetails(buildUrl: BuildUrl) =
+    private suspend fun fetchPersonDetails(buildUrl: BuildUrl) =
         httpClient.get<PersonDetails> {
             url(buildUrl)
         }

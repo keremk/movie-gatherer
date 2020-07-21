@@ -37,6 +37,10 @@ class Producers(
             throw ResultsProductionException(results, e)
         }
     }
+
+    fun close() {
+        kafkaProducer.close()
+    }
 }
 
 sealed class Producable() {

@@ -1,12 +1,11 @@
 package com.codingventures.movies.containers
 
-import com.codingventures.movies.mockdata.*
+import com.codingventures.movies.mockdata.response.*
 import mu.KotlinLogging
 import org.mockserver.client.MockServerClient
 import org.mockserver.model.HttpRequest.request
 import org.mockserver.model.HttpResponse.response
 import org.mockserver.model.MediaType
-import org.mockserver.model.Not
 import org.mockserver.model.Parameter
 import java.util.concurrent.atomic.AtomicBoolean
 

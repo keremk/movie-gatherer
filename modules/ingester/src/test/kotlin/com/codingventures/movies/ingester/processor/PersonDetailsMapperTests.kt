@@ -8,7 +8,7 @@ import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.shouldBe
 
 class PersonDetailsMapperTests : ShouldSpec() {
-    val imagesResponse = Images(
+    private val imagesResponse = Images(
         profiles = listOf(
             Profile(
                 language = null,

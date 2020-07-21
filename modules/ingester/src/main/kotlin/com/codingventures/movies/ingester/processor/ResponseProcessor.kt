@@ -1,6 +1,5 @@
 package com.codingventures.movies.ingester.processor
 
-import com.codingventures.movies.domain.MovieIndustryData
 import com.codingventures.movies.domain.FetchTask
 import com.codingventures.movies.domain.ProductionTask
 import com.codingventures.movies.ingester.remote.tmdb.response.MovieDetails as MovieDetailsResponse
@@ -18,8 +17,12 @@ data class ResponseProcessorException(
     val inner: Exception
 ) : Exception()
 
-object ResponseProcessor {
-    fun processResponse(response: TmdbResponse): ProductionTask {
+class ResponseProcessor(
+    private val maxNoPages: Int,
+    private val maxNoCrewRequests: Int,
+    private val maxNoCastRequests: Int) {
+
+    fun process(response: TmdbResponse): ProductionTask {
         try {
             return when (response) {
                 is MovieListResponse -> processMovieList(response)
@@ -51,15 +54,22 @@ object ResponseProcessor {
 
     private fun nextPageMovieListTask(currentPage: Int, totalPages: Int): FetchTask? {
         if (currentPage >= totalPages) return null
-
-        if (currentPage >= 3) return null // For debugging, comment out when in production
+        if (currentPage >= maxNoPages) return null
 
         val nextPage = currentPage + 1
         return popularMoviesFetchTask(nextPage)
     }
 
     private fun personDetailsTasks(crew: List<CrewResponse>, cast: List<CastResponse>) = listOf(
-        crew.map { it.id }.take(5),
-        cast.map { it.id }.take(5)
-    ).flatten().map { personDetailsFetchTask("$it") }
+        crew.map { it.id }.take(maxNoCrewRequests),
+        cast.map { it.id }.take(maxNoCastRequests)
+    ).flatten().distinct().map { personDetailsFetchTask("$it") }
+
+    companion object {
+        fun initialize(maxNoPages: Int,
+                       maxNoCrewRequests: Int,
+                       maxNoCastRequests: Int): ResponseProcessor {
+            return ResponseProcessor(maxNoPages, maxNoCrewRequests, maxNoCastRequests)
+        }
+    }
 }

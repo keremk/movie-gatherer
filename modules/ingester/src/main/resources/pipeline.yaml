@@ -1,0 +1,4 @@
+pipeline:
+  maxNoPages: ${MAX_NO_PAGES}
+  maxNoCrewRequests: ${MAX_NO_CREW_REQUESTS}
+  maxNoCastRequests: ${MAX_NO_CAST_REQUESTS}

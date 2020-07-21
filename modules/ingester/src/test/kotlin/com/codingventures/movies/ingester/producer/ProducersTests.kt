@@ -1,11 +1,12 @@
 package com.codingventures.movies.ingester.producer
 
 import com.codingventures.movies.domain.MovieDetails
-import com.codingventures.movies.ingester.data.mockMovieDetails
 import com.codingventures.movies.domain.FetchTask
+import com.codingventures.movies.domain.ProductionTask
 import com.codingventures.movies.ingester.remote.tmdb.tasks.personDetailsFetchTask
 import com.codingventures.movies.ingester.testutils.MockKafkaAvroGenericRecordSerializer
 import com.codingventures.movies.kafka.KafkaTopics
+import com.codingventures.movies.mockdata.domain.mockMovieDetails
 import com.sksamuel.avro4k.Avro
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
@@ -25,15 +26,15 @@ class ProducersTests : ShouldSpec() {
                 kafkaProducer = MockProducer(true, StringSerializer(), MockKafkaAvroGenericRecordSerializer()),
                 topics = KafkaTopics(movies = "testmovies", people = "testpeople", tasks = "testtasks", deadLetters = "testLetters")
             )
-            val input = Pair(
-                null,
-                listOf(
+            val input = ProductionTask(
+                movieIndustryData = null,
+                additionalTasks = listOf(
                     personDetailsFetchTask("1234")
                 )
             )
             producers.produceDataAndTasks(input, producers.topics.tasks)
             val history = (producers.kafkaProducer as MockProducer).history()
-            val expectedRecord = Avro.default.toRecord(FetchTask.serializer(), input.second[0])
+            val expectedRecord = Avro.default.toRecord(FetchTask.serializer(), input.additionalTasks[0])
             history.count() shouldBe 1
             history[0].value() shouldBe expectedRecord
             isValidUUID(history[0].key()) shouldBe true
@@ -44,16 +45,18 @@ class ProducersTests : ShouldSpec() {
                 kafkaProducer = MockProducer(true, StringSerializer(), MockKafkaAvroGenericRecordSerializer()),
                 topics = KafkaTopics(movies = "testmovies", people = "testpeople", tasks = "testtasks", deadLetters = "testLetters")
             )
-            val input = Pair(
-                mockMovieDetails,
-                listOf(
+            val input = ProductionTask(
+                movieIndustryData = mockMovieDetails,
+                additionalTasks = listOf(
                     personDetailsFetchTask("1234")
                 )
             )
             producers.produceDataAndTasks(input, producers.topics.tasks)
             val history = (producers.kafkaProducer as MockProducer).history()
-            val expectedMovieRecord = Avro.default.toRecord(MovieDetails.serializer(), input.first)
-            val expectedFetchTaskRecord = Avro.default.toRecord(FetchTask.serializer(), input.second[0])
+
+            val expectedMovieDetails = input.movieIndustryData as MovieDetails
+            val expectedMovieRecord = Avro.default.toRecord(MovieDetails.serializer(), expectedMovieDetails)
+            val expectedFetchTaskRecord = Avro.default.toRecord(FetchTask.serializer(), input.additionalTasks[0])
 
             history.count() shouldBe 2
             val results = listOf(history[0].value(), history[1].value())

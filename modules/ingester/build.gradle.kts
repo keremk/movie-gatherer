@@ -7,19 +7,11 @@ import dependencies.ktorVersion
 import dependencies.kafkaVersion
 import dependencies.kotlinLogVersion
 import dependencies.simpleLogVersion
-import dependencies.arrowVersion
-
-plugins {
-    kotlin("kapt")
-}
+import dependencies.kotestVersion
 
 dependencies {
     implementation(project(":modules:movies-domain"))
     implementation(project(":modules:kafka-common"))
-
-    implementation("io.arrow-kt:arrow-core:$arrowVersion")
-    implementation("io.arrow-kt:arrow-syntax:$arrowVersion")
-//    kapt("io.arrow-kt:arrow-meta:$arrowVersion")
 
     implementation("io.confluent:kafka-avro-serializer:$avroSerializerVersion")
     implementation("com.sksamuel.hoplite:hoplite-core:$hopliteVersion")
@@ -34,6 +26,8 @@ dependencies {
     implementation("io.github.microutils:kotlin-logging:$kotlinLogVersion")
     implementation("org.slf4j:slf4j-simple:$simpleLogVersion")
 
+    testImplementation(project(":modules:tests-common"))
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
     testImplementation("io.ktor:ktor-client-mock-jvm:$ktorVersion")
+    testImplementation("io.kotest:kotest-runner-console-jvm:$kotestVersion")
 }
