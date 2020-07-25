@@ -11,9 +11,9 @@ import dependencies.kotestVersion
 
 plugins {
     kotlin("jvm") apply false
-    kotlin("kapt") version "1.3.72" apply false
+//    kotlin("kapt") version "1.3.72" apply false
     id("org.jetbrains.kotlin.plugin.serialization") apply false
-//    id("com.google.cloud.tools.jib") apply false
+    id("com.google.cloud.tools.jib") version "2.4.0" apply false
 }
 
 allprojects {
@@ -39,6 +39,11 @@ configure(subprojects.filter { it.name != "modules" }) {
                 jvmTarget = "1.8"
                 allWarningsAsErrors = true
             }
+        }
+
+        withType<JavaCompile> {
+            sourceCompatibility = JavaVersion.VERSION_1_8.toString()
+            targetCompatibility = JavaVersion.VERSION_1_8.toString()
         }
 
         withType<Test> {

@@ -9,6 +9,10 @@ import dependencies.kotlinLogVersion
 import dependencies.simpleLogVersion
 import dependencies.kotestVersion
 
+plugins {
+    id("com.google.cloud.tools.jib")
+}
+
 dependencies {
     implementation(project(":modules:movies-domain"))
     implementation(project(":modules:kafka-common"))
@@ -30,4 +34,14 @@ dependencies {
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
     testImplementation("io.ktor:ktor-client-mock-jvm:$ktorVersion")
     testImplementation("io.kotest:kotest-runner-console-jvm:$kotestVersion")
+}
+
+jib {
+    to {
+        image = "nuc.local:32000/${project.name}:${version}"
+    }
+    from {
+        image = "gcr.io/distroless/java:11"
+    }
+    setAllowInsecureRegistries(true)
 }
