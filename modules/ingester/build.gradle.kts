@@ -36,7 +36,7 @@ dependencies {
     testImplementation("io.kotest:kotest-runner-console-jvm:$kotestVersion")
 }
 
-val hostname = System.getenv("REGISTRY_SERVICE_HOST")
+val hostname = System.getenv("REGISTRY_CONTAINER-REGISTRY_SERVICE_HOST")
 val hostPort = System.getenv("REGISTRY_SERVICE_PORT")
 
 jib {
