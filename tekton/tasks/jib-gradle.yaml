@@ -1,0 +1,73 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: jib-gradle
+  labels:
+    app.kubernetes.io/version: "0.1"
+  annotations:
+    tekton.dev/pipelines.minVersion: "0.12.1"
+    tekton.dev/tags: image-build
+    tekton.dev/displayName: "jib gradle"
+spec:
+  description: >-
+    This Task builds Java/Kotlin/Groovy/Scala source into a container image using Google’s Jib tool.
+    Jib works with Gradle and Maven projects, and this template is for Gradle projects.
+  params:
+  - name: IMAGEURL
+    description: The url of the container image repository
+    default: ""
+  - name: MODULEPATH
+    description: The full module path in the project, followed by ":". E.g. ":modules:ingester:" will point to the ingester module within the modules folder
+    default: ""
+  - name: DIRECTORY
+    description: The directory containing the app, relative to the source repository root
+    default: .
+  - name: CACHE
+    description: The name of the volume for caching Gradle artifacts, local Maven repository, and base image layers
+    default: empty-dir-volume
+  - name: INSECUREREGISTRY
+    description: Whether to allow insecure registry
+    default: "false"
+  workspaces:
+  - name: source
+  steps:
+  - name: build-and-push
+    image: gcr.io/cloud-builders/gradle
+    script: |
+      #!/bin/sh
+      set -o errexit
+      # Runs the Gradle Jib build.
+      gradle $(params.MODULEPATH):jib \
+        --stacktrace --console=plain \
+        --gradle-user-home=$HOME/.gradle \
+        -Dgradle.user.home=$HOME/.gradle \
+        -Duser.home=$HOME \
+        -Djib.allowInsecureRegistries=$(params.INSECUREREGISTRY) \
+        -Djib.to.image=$(params.IMAGEURL)
+    workingDir: $(workspaces.source.path)/$(params.DIRECTORY)
+    env:
+    - name: HOME
+      value: /workspace
+    volumeMounts:
+    # empty volume required to make the Gradle home globally writable
+    - name: empty-dir-volume
+      mountPath: /workspace/.gradle
+      subPath: gradle-user-home
+    - name: $(params.CACHE)
+      mountPath: /workspace/.gradle/caches
+      subPath: gradle-caches
+    - name: $(params.CACHE)
+      mountPath: /workspace/.gradle/wrapper
+      subPath: gradle-wrapper
+    - name: $(params.CACHE)
+      mountPath: /workspace/.m2
+      subPath: m2-cache
+    - name: $(params.CACHE)
+      mountPath: /workspace/.cache
+      subPath: jib-cache
+    securityContext:
+      runAsUser: 0
+
+  volumes:
+  - name: empty-dir-volume
+    emptyDir: {}

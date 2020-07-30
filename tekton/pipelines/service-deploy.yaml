@@ -1,0 +1,47 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: jib-gradle-test-pipeline
+spec:
+  workspaces:
+  - name: shared-workspace
+  tasks:
+  - name: fetch-repository
+    taskRef:
+      name: git-clone
+    workspaces:
+    - name: output
+      workspace: shared-workspace
+    params:
+    - name: url
+      value: https://github.com/keremk/movie-gatherer
+    - name: subdirectory
+      value: ""
+    - name: deleteExisting
+      value: "true"
+  - name: run-unit-tests
+    taskRef:
+        name: unit-test
+    runAfter:
+    - fetch-repository
+    workspaces:
+    - name: source
+      workspace: shared-workspace
+    params:
+    - name: MODULEPATH
+      value: ":modules:ingester:"
+  - name: create-image
+    taskRef:
+      name: jib-gradle
+    runAfter:
+    - run-unit-tests
+    workspaces:
+    - name: source
+      workspace: shared-workspace
+    params:
+    - name: IMAGEURL
+      value: "192.168.1.78:32000/ingester:v0.0.1"
+    - name: INSECUREREGISTRY
+      value: "true"
+    - name: MODULEPATH
+      value: ":modules:ingester:"  

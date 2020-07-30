@@ -18,13 +18,15 @@ import io.ktor.client.features.json.serializer.KotlinxSerializer
 import io.ktor.client.request.post
 import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
+import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.coroutineScope
 
 typealias BuildUrl = URLBuilder.(URLBuilder) -> Unit
 
 class Schemas : CliktCommand() {
-    val schema by option().choice("people", "movie", "fetchtask")
+    private val schema by option().choice("people", "movie", "fetchtask")
 
+    @KtorExperimentalAPI
     override fun run() {
         val schemaChoice = schema ?: return
 
@@ -37,6 +39,7 @@ class Schemas : CliktCommand() {
         }
     }
 
+    @KtorExperimentalAPI
     fun registerSchemas() = runBlocking {
         val schemaList = mapOf(
             "Tasks" to Avro.default.schema(FetchTask.serializer()),
@@ -56,6 +59,7 @@ class Schemas : CliktCommand() {
         encodedPath = "/subjects/$schemaName-value/versions"
     }
 
+    @KtorExperimentalAPI
     private suspend fun registerSchema(name: String, schemaDesc: Schema) = coroutineScope {
         val httpClient = HttpClient(CIO) {
             install(JsonFeature) {
@@ -64,7 +68,7 @@ class Schemas : CliktCommand() {
                 )
             }
         }
-        val result = httpClient.post<String>() {
+        httpClient.post<String> {
             url(buildUrl(name))
             body = schemaDesc.toString(true)
         }

@@ -1,0 +1,63 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: unit-test
+  labels:
+    app.kubernetes.io/version: "0.1"
+  annotations:
+    tekton.dev/pipelines.minVersion: "0.12.1"
+    tekton.dev/tags: unit-test
+    tekton.dev/displayName: "unit tests"
+spec:
+  description: >-
+    This Task runs Java/Kotlin/Groovy/Scala unit tests.
+  params:
+  - name: MODULEPATH
+    description: The full module path in the project, followed by ":". E.g. ":modules:ingester:" will point to the ingester module within the modules folder
+    default: ""
+  - name: DIRECTORY
+    description: The directory containing the app, relative to the source repository root
+    default: .
+  - name: CACHE
+    description: The name of the volume for caching Gradle artifacts, local Maven repository, and base image layers
+    default: empty-dir-volume
+  workspaces:
+  - name: source
+  steps:
+  - name: build-and-push
+    image: gcr.io/cloud-builders/gradle
+    script: |
+      #!/bin/sh
+      set -o errexit
+      gradle $(params.MODULEPATH):test \
+        --stacktrace --console=plain \
+        --gradle-user-home=$HOME/.gradle \
+        -Dgradle.user.home=$HOME/.gradle \
+        -Duser.home=$HOME \
+    workingDir: $(workspaces.source.path)/$(params.DIRECTORY)
+    env:
+    - name: HOME
+      value: /workspace
+    volumeMounts:
+    # empty volume required to make the Gradle home globally writable
+    - name: empty-dir-volume
+      mountPath: /workspace/.gradle
+      subPath: gradle-user-home
+    - name: $(params.CACHE)
+      mountPath: /workspace/.gradle/caches
+      subPath: gradle-caches
+    - name: $(params.CACHE)
+      mountPath: /workspace/.gradle/wrapper
+      subPath: gradle-wrapper
+    - name: $(params.CACHE)
+      mountPath: /workspace/.m2
+      subPath: m2-cache
+    - name: $(params.CACHE)
+      mountPath: /workspace/.cache
+      subPath: jib-cache
+    securityContext:
+      runAsUser: 0
+
+  volumes:
+  - name: empty-dir-volume
+    emptyDir: {}
