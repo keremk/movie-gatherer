@@ -39,13 +39,13 @@ dependencies {
 val hostname = System.getenv("REGISTRY_CONTAINER-REGISTRY_SERVICE_HOST")
 val hostPort = System.getenv("REGISTRY_SERVICE_PORT")
 
-jib {
-    to {
-//        image = "192.168.1.78:32000/${project.name}:${version}"
-        image = "${hostname}:32000/${project.name}:${version}"
-    }
-//    from {
-//        image = "gcr.io/distroless/java:11"
+//jib {
+//    to {
+////        image = "192.168.1.78:32000/${project.name}:${version}"
+//        image = "${hostname}:32000/${project.name}:${version}"
 //    }
-    setAllowInsecureRegistries(true)
-}
+////    from {
+////        image = "gcr.io/distroless/java:11"
+////    }
+//    setAllowInsecureRegistries(true)
+//}
