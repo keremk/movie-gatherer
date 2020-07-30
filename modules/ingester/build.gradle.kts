@@ -38,10 +38,10 @@ dependencies {
 
 jib {
     to {
-        image = "nuc.local:32000/${project.name}:${version}"
+        image = "192.168.1.78:32000/${project.name}:${version}"
     }
-    from {
-        image = "gcr.io/distroless/java:11"
-    }
+//    from {
+//        image = "gcr.io/distroless/java:11"
+//    }
     setAllowInsecureRegistries(true)
 }
