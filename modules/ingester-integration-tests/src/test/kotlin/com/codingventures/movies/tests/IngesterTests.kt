@@ -37,42 +37,6 @@ import org.apache.avro.generic.GenericRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.clients.producer.KafkaProducer
 
-//class TestSetupListener: TestListener {
-//    private lateinit var remoteConfigProvider: RemoteConfigProvider
-//    private lateinit var sutRunner: Pipeline
-//    private lateinit var moviesListener: KafkaRunner
-//    private lateinit var peopleListener: KafkaRunner
-//    private lateinit var producers: Producers
-//
-//    private lateinit var
-//
-//    override suspend fun beforeTest(testCase: TestCase) = coroutineScope {
-//        super.beforeTest(testCase)
-//
-//        val sutJob = launch {
-//            sutRunner.run()
-//        }
-//        val moviesChannel = Channel<ConsumerRecords<String, GenericRecord>>()
-//        val moviesJob = launch(Dispatchers.IO) {
-//            moviesListener.run(listOf(kafkaTopics.movies), moviesChannel)
-//        }
-//        val peopleChannel = Channel<ConsumerRecords<String, GenericRecord>>()
-//        val peopleJob = launch(Dispatchers.IO) {
-//            peopleListener.run(listOf(kafkaTopics.people), peopleChannel)
-//        }
-//
-//    }
-//
-//
-//    @KtorExperimentalAPI
-//    override suspend fun beforeSpec(spec: Spec) {
-//        super.beforeSpec(spec)
-//        initalizeMockTmdbServer()
-//        initializeKafkaSystem()
-//    }
-//
-//}
-
 @KtorExperimentalAPI
 @ExperimentalCoroutinesApi
 class IngesterTests : ShouldSpec() {
@@ -97,11 +61,6 @@ class IngesterTests : ShouldSpec() {
         initalizeMockTmdbServer()
         initializeKafkaSystem()
     }
-
-//    override fun afterSpec(spec: Spec) {
-//        super.afterSpec(spec)
-//        cleanupKafkaSystem()
-//    }
 
     @KtorExperimentalAPI
     private fun initalizeMockTmdbServer() {
@@ -313,6 +272,4 @@ class IngesterTests : ShouldSpec() {
             peopleJob.cancel()
         }
     }
-
-
 }

@@ -1,3 +1,6 @@
 tmdbConfig:
-  host: api.themoviedb.org
+  host: ${TMDB_HOSTNAME}
   apiKey: ${TMDB_APIKEY}
+  maxNoPages: ${TMDB_MAX_NO_PAGES}
+  maxNoCrewRequests: ${TMDB_MAX_NO_CREW_REQUESTS}
+  maxNoCastRequests: ${TMDB_MAX_NO_CAST_REQUESTS}

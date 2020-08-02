@@ -6,7 +6,6 @@ import com.codingventures.movies.ingester.producer.ResultsProductionException
 import com.codingventures.movies.ingester.producer.TaskProducer
 import com.codingventures.movies.domain.FetchTask
 import com.codingventures.movies.domain.ProductionTask
-import com.codingventures.movies.ingester.config.PipelineConfigProvider
 import com.codingventures.movies.ingester.processor.ResponseProcessor
 import com.codingventures.movies.ingester.remote.tmdb.config.RemoteConfigProvider
 import com.codingventures.movies.ingester.remote.tmdb.fetchers.FetchOperationException
@@ -30,12 +29,10 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 import mu.KotlinLogging
 import org.apache.avro.generic.GenericRecord
-import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.clients.consumer.OffsetAndMetadata
 import org.apache.kafka.clients.producer.KafkaProducer
-import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.common.TopicPartition
 
 private val logger = KotlinLogging.logger {}
@@ -192,8 +189,7 @@ class Pipeline(
     companion object {
         fun initialize(
             kafkaConfigProvider: KafkaConfigProvider = KafkaConfigProvider.default(),
-            remoteConfigProvider: RemoteConfigProvider = RemoteConfigProvider.default(),
-            pipelineConfigProvider: PipelineConfigProvider = PipelineConfigProvider.default()
+            remoteConfigProvider: RemoteConfigProvider = RemoteConfigProvider.default()
         ): Pipeline {
             val httpClient = HttpClient(CIO) {
                 install(JsonFeature) {
@@ -207,10 +203,11 @@ class Pipeline(
             val kafkaProducer = KafkaProducer<String, GenericRecord>(kafkaConfigProvider.producerProperties())
             val producers = Producers(kafkaProducer, kafkaConfigProvider.kafkaTopics)
             val responseProcessor = ResponseProcessor.initialize(
-                maxNoCrewRequests = pipelineConfigProvider.maxNoCrewRequests,
-                maxNoCastRequests = pipelineConfigProvider.maxNoCastRequests,
-                maxNoPages = pipelineConfigProvider.maxNoPages
+                maxNoCrewRequests = remoteConfigProvider.maxNoCrewRequests,
+                maxNoCastRequests = remoteConfigProvider.maxNoCastRequests,
+                maxNoPages = remoteConfigProvider.maxNoPages
             )
+            printInitializedMessage(kafkaConfigProvider, remoteConfigProvider)
             return Pipeline(
                 kafkaRunner = kafkaRunner,
                 producers = producers,
@@ -218,6 +215,35 @@ class Pipeline(
                 topics = kafkaConfigProvider.kafkaTopics,
                 responseProcessor = responseProcessor
             )
+        }
+
+        private fun printInitializedMessage(
+            kafkaConfigProvider: KafkaConfigProvider,
+            remoteConfigProvider: RemoteConfigProvider
+        ) = logger.info {  """
+                Ingester pipeline initialized with: \n
+                Kafka Configuration: \n
+                -------------------- \n
+                Bootstrap Servers: ${kafkaConfigProvider.serverConfig.bootstrapServers} \n
+                Schema Registry URL: ${kafkaConfigProvider.serverConfig.schemaRegistryUrl} \n
+                Consumer ID: ${kafkaConfigProvider.consumerSettings.consumerGroupId} \n
+                Max Poll Records: ${kafkaConfigProvider.consumerSettings.maxPollRecords} \n
+                Enable Auto Commit: ${kafkaConfigProvider.consumerSettings.enableAutoCommit} \n
+                Topics: \n
+                ------- \n
+                Movies Topic: ${kafkaConfigProvider.kafkaTopics.movies} \n
+                People Topic: ${kafkaConfigProvider.kafkaTopics.people} \n
+                Tasks Topic: ${kafkaConfigProvider.kafkaTopics.tasks} \n
+                Deadletters Topic: ${kafkaConfigProvider.kafkaTopics.deadLetters} \n
+                TMDB Configuration: \n
+                ------------------- \n
+                Hostname: ${remoteConfigProvider.host} \n
+                Port: ${remoteConfigProvider.port} \n
+                HTTPS Enabled: ${remoteConfigProvider.https} \n
+                Max # Pages: ${remoteConfigProvider.maxNoPages} \n
+                Max # Crew Requests: ${remoteConfigProvider.maxNoCrewRequests} \n
+                Max # Cast Requests: ${remoteConfigProvider.maxNoCastRequests} \n
+            """.trimIndent()
         }
     }
 }
