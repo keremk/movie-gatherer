@@ -11,14 +11,17 @@ import dependencies.kotestVersion
 
 plugins {
     kotlin("jvm") apply false
-//    kotlin("kapt") version "1.3.72" apply false
     id("org.jetbrains.kotlin.plugin.serialization") apply false
     id("com.google.cloud.tools.jib") version "2.4.0" apply false
+    id("com.palantir.git-version") version "0.12.3"
 }
 
 allprojects {
     group = "com.codingventures"
-    version = "0.0.1"
+    apply(plugin = "com.palantir.git-version")
+
+    val gitVersion: groovy.lang.Closure<*> by extra
+    version = gitVersion()
 
     repositories {
         jcenter()
