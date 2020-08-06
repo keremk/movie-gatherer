@@ -40,7 +40,7 @@ spec:
       workspace: shared-workspace
     params:
     - name: IMAGEURL
-      value: "192.168.1.78:32000/ingester:v0.0.1"
+      value: "192.168.1.78:32000/ingester"
     - name: INSECUREREGISTRY
       value: "true"
     - name: MODULEPATH

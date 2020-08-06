@@ -10,7 +10,8 @@ metadata:
     tekton.dev/displayName: "unit tests"
 spec:
   description: >-
-    This Task runs Java/Kotlin/Groovy/Scala unit tests.
+    This task runs Java/Kotlin/Groovy/Scala unit tests.
+    For multi-module projects, please describe the module path.
   params:
   - name: MODULEPATH
     description: The full module path in the project, followed by ":". E.g. ":modules:ingester:" will point to the ingester module within the modules folder
@@ -33,7 +34,7 @@ spec:
         --stacktrace --console=plain \
         --gradle-user-home=$HOME/.gradle \
         -Dgradle.user.home=$HOME/.gradle \
-        -Duser.home=$HOME \
+        -Duser.home=$HOME
     workingDir: $(workspaces.source.path)/$(params.DIRECTORY)
     env:
     - name: HOME

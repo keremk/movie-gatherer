@@ -28,6 +28,9 @@ spec:
   - name: INSECUREREGISTRY
     description: Whether to allow insecure registry
     default: "false"
+  results:
+  - name: TAG
+    description: The tag for the container that is built 
   workspaces:
   - name: source
   steps:
@@ -36,14 +39,17 @@ spec:
     script: |
       #!/bin/sh
       set -o errexit
+      module_path=$(params.MODULEPATH)
+      tag=$(gradle -q $module_path:printVersion) 
       # Runs the Gradle Jib build.
-      gradle $(params.MODULEPATH):jib \
+      gradle $module_path:jib \
         --stacktrace --console=plain \
         --gradle-user-home=$HOME/.gradle \
         -Dgradle.user.home=$HOME/.gradle \
         -Duser.home=$HOME \
         -Djib.allowInsecureRegistries=$(params.INSECUREREGISTRY) \
-        -Djib.to.image=$(params.IMAGEURL)
+        -Djib.to.image=$(params.IMAGEURL):$tag
+      echo -n $tag > $(results.TAG.path)
     workingDir: $(workspaces.source.path)/$(params.DIRECTORY)
     env:
     - name: HOME
