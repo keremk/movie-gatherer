@@ -1,0 +1,20 @@
+namespace: movie-store
+imageRegistry: "localhost:32000"
+imageTag: "0"
+replicaCount: "1"
+tmdb:
+    hostname: "api.themoviedb.org"
+    maxNoPages: "1000"
+    maxNoCrewRequests: "500"
+    maxNoCastRequests: "500"
+kafka: 
+    maxPollRecords: "100"
+    consumerGroupId: "movies-ingester"
+    enableAutoCommit: "false"
+    bootstrapServers: "PLAINTEXT://192.168.1.78:9092"
+    schemaRegistryUrl: "http://192.168.1.78:8081"
+topics:
+    tasks: "tasks"
+    people: "people"
+    movies: "movies"
+    deadLetters: "deadletters"

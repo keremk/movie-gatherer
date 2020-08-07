@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ingester-config
+  namespace: {{ .Values.namespace }}
+data:
+  bootstrapServers: {{ quote .Values.kafka.bootstrapServers }}
+  schemaRegistryUrl: {{ quote .Values.kafka.schemaRegistryUrl }}
+  maxPollRecords: {{ quote .Values.kafka.maxPollRecords }}
+  consumerGroupId: {{ .Values.kafka.consumerGroupId }}
+  enableAutoCommit: {{ quote .Values.kafka.enableAutoCommit }}
+  tasksTopic: {{ .Values.topics.tasks }}
+  peopleTopic: {{ .Values.topics.people }}
+  moviesTopic: {{ .Values.topics.movies }}
+  deadLettersTopic: {{ .Values.topics.deadLetters }}
+  tmdbHostname: {{ .Values.tmdb.hostname }}
+  tmdbMaxNoPages: {{ quote .Values.tmdb.maxNoPages }}
+  tmdbMaxNoCrewRequests: {{ quote .Values.tmdb.maxNoCrewRequests }}
+  tmdbMaxNoCastRequests: {{ quote .Values.tmdb.maxNoCastRequests }}

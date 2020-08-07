@@ -1,0 +1,8 @@
+apiVersion: v2
+name: movie-gatherer
+version: 0.0.1
+description: Set of microservices that retrieve movie information
+sources:
+    - https://github.com/keremk/movie-gatherer
+maintainers:
+    - name: Kerem Karatal

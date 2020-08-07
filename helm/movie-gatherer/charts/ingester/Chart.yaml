@@ -1,0 +1,8 @@
+apiVersion: v2
+name: ingester
+version: "0.0.1"
+description: Microservice that calls TMDB API and stores MovieIndustryData in Kafka topics
+sources:
+    - https://github.com/keremk/movie-gatherer
+maintainers:
+    - name: Kerem Karatal

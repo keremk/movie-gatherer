@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: ingester-deployment
+  namespace: {{ .Values.namespace }}
+  labels: 
+    app: ingester
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: ingester
+  template:
+    metadata:
+      labels:
+        app: ingester     
+    spec:
+      containers:
+      - name: ingester
+        image: "{{ .Values.imageRegistry }}/ingester:{{ .Values.imageTag }}"
+        env:
+        - name: BOOTSTRAP_SERVERS_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: ingester-config
+              key: bootstrapServers
+        - name: SCHEMA_REGISTRY_URL
+          valueFrom:
+            configMapKeyRef:
+              name: ingester-config
+              key: schemaRegistryUrl
+        - name: MAX_POLL_RECORDS
+          valueFrom:
+            configMapKeyRef:
+              name: ingester-config
+              key: maxPollRecords
+        - name: CONSUMER_GROUP_ID
+          valueFrom:
+            configMapKeyRef:
+              name: ingester-config
+              key: consumerGroupId
+        - name: ENABLE_AUTO_COMMIT
+          valueFrom:
+            configMapKeyRef:
+              name: ingester-config
+              key: enableAutoCommit
+        - name: TASKS_TOPIC
+          valueFrom:
+            configMapKeyRef:
+              name: ingester-config
+              key: tasksTopic
+        - name: PEOPLE_TOPIC
+          valueFrom:
+            configMapKeyRef:
+              name: ingester-config
+              key: peopleTopic
+        - name: MOVIES_TOPIC
+          valueFrom:
+            configMapKeyRef:
+              name: ingester-config
+              key: moviesTopic
+        - name: DEADLETTERS_TOPIC
+          valueFrom:
+            configMapKeyRef:
+              name: ingester-config
+              key: deadLettersTopic
+        - name: TMDB_HOSTNAME
+          valueFrom:
+            configMapKeyRef:
+              name: ingester-config
+              key: tmdbHostname
+        - name: TMDB_MAX_NO_PAGES
+          valueFrom:
+            configMapKeyRef:
+              name: ingester-config
+              key: tmdbMaxNoPages
+        - name: TMDB_MAX_NO_CREW_REQUESTS
+          valueFrom:
+            configMapKeyRef:
+              name: ingester-config
+              key: tmdbMaxNoCrewRequests
+        - name: TMDB_MAX_NO_CAST_REQUESTS
+          valueFrom:
+            configMapKeyRef:
+              name: ingester-config
+              key: tmdbMaxNoCastRequests
+        - name: TMDB_APIKEY
+          valueFrom:
+            secretKeyRef:
+              name: tmdb-secret
+              key: tmdbApiKey                
