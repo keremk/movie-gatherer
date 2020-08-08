@@ -221,28 +221,28 @@ class Pipeline(
             kafkaConfigProvider: KafkaConfigProvider,
             remoteConfigProvider: RemoteConfigProvider
         ) = logger.info {  """
-                Ingester pipeline initialized with: \n
-                Kafka Configuration: \n
-                -------------------- \n
-                Bootstrap Servers: ${kafkaConfigProvider.serverConfig.bootstrapServers} \n
-                Schema Registry URL: ${kafkaConfigProvider.serverConfig.schemaRegistryUrl} \n
-                Consumer ID: ${kafkaConfigProvider.consumerSettings.consumerGroupId} \n
-                Max Poll Records: ${kafkaConfigProvider.consumerSettings.maxPollRecords} \n
-                Enable Auto Commit: ${kafkaConfigProvider.consumerSettings.enableAutoCommit} \n
-                Topics: \n
-                ------- \n
-                Movies Topic: ${kafkaConfigProvider.kafkaTopics.movies} \n
-                People Topic: ${kafkaConfigProvider.kafkaTopics.people} \n
-                Tasks Topic: ${kafkaConfigProvider.kafkaTopics.tasks} \n
-                Deadletters Topic: ${kafkaConfigProvider.kafkaTopics.deadLetters} \n
-                TMDB Configuration: \n
-                ------------------- \n
-                Hostname: ${remoteConfigProvider.host} \n
-                Port: ${remoteConfigProvider.port} \n
-                HTTPS Enabled: ${remoteConfigProvider.https} \n
-                Max # Pages: ${remoteConfigProvider.maxNoPages} \n
-                Max # Crew Requests: ${remoteConfigProvider.maxNoCrewRequests} \n
-                Max # Cast Requests: ${remoteConfigProvider.maxNoCastRequests} \n
+                Ingester pipeline initialized with:
+                Kafka Configuration: 
+                -------------------- 
+                Bootstrap Servers: ${kafkaConfigProvider.serverConfig.bootstrapServers} 
+                Schema Registry URL: ${kafkaConfigProvider.serverConfig.schemaRegistryUrl} 
+                Consumer ID: ${kafkaConfigProvider.consumerSettings.consumerGroupId} 
+                Max Poll Records: ${kafkaConfigProvider.consumerSettings.maxPollRecords} 
+                Enable Auto Commit: ${kafkaConfigProvider.consumerSettings.enableAutoCommit} 
+                Topics: 
+                ------- 
+                Movies Topic: ${kafkaConfigProvider.kafkaTopics.movies} 
+                People Topic: ${kafkaConfigProvider.kafkaTopics.people} 
+                Tasks Topic: ${kafkaConfigProvider.kafkaTopics.tasks} 
+                Deadletters Topic: ${kafkaConfigProvider.kafkaTopics.deadLetters} 
+                TMDB Configuration: 
+                ------------------- 
+                Hostname: ${remoteConfigProvider.host} 
+                Port: ${remoteConfigProvider.port} 
+                HTTPS Enabled: ${remoteConfigProvider.https} 
+                Max # Pages: ${remoteConfigProvider.maxNoPages} 
+                Max # Crew Requests: ${remoteConfigProvider.maxNoCrewRequests} 
+                Max # Cast Requests: ${remoteConfigProvider.maxNoCastRequests} 
             """.trimIndent()
         }
     }

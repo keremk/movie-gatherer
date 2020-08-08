@@ -24,7 +24,7 @@ data class KafkaTopics(
     val deadLetters: String
 )
 
-class KafkaConfigProvider(
+data class KafkaConfigProvider(
     val consumerSettings: ConsumerSettings,
     val serverConfig: ServerConfig,
     val kafkaTopics: KafkaTopics) {

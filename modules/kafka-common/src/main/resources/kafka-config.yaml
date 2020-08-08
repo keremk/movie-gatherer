@@ -2,7 +2,7 @@ serverConfig:
   bootstrapServers: ${BOOTSTRAP_SERVERS_CONFIG}
   schemaRegistryUrl: ${SCHEMA_REGISTRY_URL}
 
-consumerConfig:
+consumerSettings:
   maxPollRecords: ${MAX_POLL_RECORDS}
   consumerGroupId: ${CONSUMER_GROUP_ID}
   enableAutoCommit: ${ENABLE_AUTO_COMMIT}

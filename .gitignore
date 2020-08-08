@@ -1,5 +1,8 @@
 **/.DS_Store
 
+# Local .env file
+.env
+
 # VSCode config
 .vscode
 
