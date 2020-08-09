@@ -45,3 +45,18 @@ spec:
       value: "true"
     - name: MODULEPATH
       value: ":modules:ingester:"  
+  - name: deploy
+    taskRef:
+      name: helm-upgrade-from-source
+    runAfter: 
+    - create-image
+    workspaces:
+    - name: source
+      workspace: shared-workspace
+    params:
+    - name: charts_dir
+      value: "./helm/movie-gatherer/charts/ingester"
+    - name: overwrite_values
+      value: "imageTag=$(tasks.create-image.results.TAG)"
+    - name: release_namespace
+      value: "movie-store"
