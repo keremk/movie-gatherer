@@ -13,13 +13,13 @@ spec:
     This task runs Java/Kotlin/Groovy/Scala unit tests.
     For multi-module projects, please describe the module path.
   params:
-  - name: MODULEPATH
+  - name: modulePath
     description: The full module path in the project, followed by ":". E.g. ":modules:ingester:" will point to the ingester module within the modules folder
     default: ""
-  - name: DIRECTORY
+  - name: directory
     description: The directory containing the app, relative to the source repository root
     default: .
-  - name: CACHE
+  - name: cache
     description: The name of the volume for caching Gradle artifacts, local Maven repository, and base image layers
     default: empty-dir-volume
   workspaces:
@@ -30,12 +30,12 @@ spec:
     script: |
       #!/bin/sh
       set -o errexit
-      gradle $(params.MODULEPATH):test \
+      gradle $(params.modulePath):test \
         --stacktrace --console=plain \
         --gradle-user-home=$HOME/.gradle \
         -Dgradle.user.home=$HOME/.gradle \
         -Duser.home=$HOME
-    workingDir: $(workspaces.source.path)/$(params.DIRECTORY)
+    workingDir: $(workspaces.source.path)/$(params.directory)
     env:
     - name: HOME
       value: /workspace
@@ -44,16 +44,16 @@ spec:
     - name: empty-dir-volume
       mountPath: /workspace/.gradle
       subPath: gradle-user-home
-    - name: $(params.CACHE)
+    - name: $(params.cache)
       mountPath: /workspace/.gradle/caches
       subPath: gradle-caches
-    - name: $(params.CACHE)
+    - name: $(params.cache)
       mountPath: /workspace/.gradle/wrapper
       subPath: gradle-wrapper
-    - name: $(params.CACHE)
+    - name: $(params.cache)
       mountPath: /workspace/.m2
       subPath: m2-cache
-    - name: $(params.CACHE)
+    - name: $(params.cache)
       mountPath: /workspace/.cache
       subPath: jib-cache
     securityContext:

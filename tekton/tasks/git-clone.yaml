@@ -2,6 +2,7 @@ apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: git-clone
+  namespace: movie-store
   labels:
     app.kubernetes.io/version: "0.1"
   annotations:

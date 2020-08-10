@@ -1,7 +1,8 @@
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: jib-gradle-test-pipeline
+  name: deploy-ingester-pipeline
+  namespace: movie-store
 spec:
   workspaces:
   - name: shared-workspace
@@ -19,31 +20,20 @@ spec:
       value: ""
     - name: deleteExisting
       value: "true"
-  - name: run-unit-tests
+  - name: create-image
     taskRef:
-        name: unit-test
+      name: test-build
     runAfter:
     - fetch-repository
     workspaces:
     - name: source
       workspace: shared-workspace
     params:
-    - name: MODULEPATH
-      value: ":modules:ingester:"
-  - name: create-image
-    taskRef:
-      name: jib-gradle
-    runAfter:
-    - run-unit-tests
-    workspaces:
-    - name: source
-      workspace: shared-workspace
-    params:
-    - name: IMAGEURL
+    - name: imageUrl
       value: "192.168.1.78:32000/ingester"
-    - name: INSECUREREGISTRY
+    - name: insecureRegistry
       value: "true"
-    - name: MODULEPATH
+    - name: modulePath
       value: ":modules:ingester:"  
   - name: deploy
     taskRef:
@@ -54,9 +44,23 @@ spec:
     - name: source
       workspace: shared-workspace
     params:
-    - name: charts_dir
+    - name: chartsDirectory
       value: "./helm/movie-gatherer/charts/ingester"
-    - name: overwrite_values
-      value: "imageTag=$(tasks.create-image.results.TAG)"
-    - name: release_namespace
+    - name: overwriteValues
+      value: "imageTag=$(tasks.create-image.results.tag)"
+    - name: releaseNamespace
       value: "movie-store"
+---
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: deploy-ingester-pipeline-run
+  namespace: movie-store
+spec:
+  serviceAccountName: deploy-pipeline-run-sa
+  pipelineRef:
+    name: deploy-ingester-pipeline
+  workspaces:
+    - name: shared-workspace
+      persistentvolumeclaim:
+        claimName: deploy-ingester-pvc

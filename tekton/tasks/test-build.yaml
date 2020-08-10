@@ -1,35 +1,36 @@
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: jib-gradle
+  name: test-build
+  namespace: movie-store
   labels:
     app.kubernetes.io/version: "0.1"
   annotations:
     tekton.dev/pipelines.minVersion: "0.12.1"
     tekton.dev/tags: image-build
-    tekton.dev/displayName: "jib gradle"
+    tekton.dev/displayName: "Test and Build"
 spec:
   description: >-
     This Task builds Java/Kotlin/Groovy/Scala source into a container image using Google’s Jib tool.
     Jib works with Gradle and Maven projects, and this template is for Gradle projects.
   params:
-  - name: IMAGEURL
+  - name: imageUrl
     description: The url of the container image repository
     default: ""
-  - name: MODULEPATH
+  - name: modulePath
     description: The full module path in the project, followed by ":". E.g. ":modules:ingester:" will point to the ingester module within the modules folder
     default: ""
-  - name: DIRECTORY
+  - name: directory
     description: The directory containing the app, relative to the source repository root
     default: .
-  - name: CACHE
+  - name: cache
     description: The name of the volume for caching Gradle artifacts, local Maven repository, and base image layers
     default: empty-dir-volume
-  - name: INSECUREREGISTRY
+  - name: insecureRegistry
     description: Whether to allow insecure registry
     default: "false"
   results:
-  - name: TAG
+  - name: tag
     description: The tag for the container that is built 
   workspaces:
   - name: source
@@ -39,18 +40,18 @@ spec:
     script: |
       #!/bin/sh
       set -o errexit
-      module_path=$(params.MODULEPATH)
-      tag=$(gradle -q $module_path:printVersion) 
-      # Runs the Gradle Jib build.
-      gradle $module_path:jib \
+      modulePath=$(params.modulePath)
+      tag=$(gradle -q $modulePath:printVersion) 
+      # Runs tests and the Gradle Jib build.
+      gradle $modulePath:test $modulePath:jib \
         --stacktrace --console=plain \
         --gradle-user-home=$HOME/.gradle \
         -Dgradle.user.home=$HOME/.gradle \
         -Duser.home=$HOME \
-        -Djib.allowInsecureRegistries=$(params.INSECUREREGISTRY) \
-        -Djib.to.image=$(params.IMAGEURL):$tag
-      echo -n $tag > $(results.TAG.path)
-    workingDir: $(workspaces.source.path)/$(params.DIRECTORY)
+        -Djib.allowInsecureRegistries=$(params.insecureRegistry) \
+        -Djib.to.image=$(params.imageUrl):$tag
+      echo -n $tag > $(results.tag.path)
+    workingDir: $(workspaces.source.path)/$(params.directory)
     env:
     - name: HOME
       value: /workspace
@@ -59,16 +60,16 @@ spec:
     - name: empty-dir-volume
       mountPath: /workspace/.gradle
       subPath: gradle-user-home
-    - name: $(params.CACHE)
+    - name: $(params.cache)
       mountPath: /workspace/.gradle/caches
       subPath: gradle-caches
-    - name: $(params.CACHE)
+    - name: $(params.cache)
       mountPath: /workspace/.gradle/wrapper
       subPath: gradle-wrapper
-    - name: $(params.CACHE)
+    - name: $(params.cache)
       mountPath: /workspace/.m2
       subPath: m2-cache
-    - name: $(params.CACHE)
+    - name: $(params.cache)
       mountPath: /workspace/.cache
       subPath: jib-cache
     securityContext:

@@ -2,6 +2,7 @@ apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: helm-upgrade-from-source
+  namespace: movie-store
   labels:
     app.kubernetes.io/version: "0.1"
   annotations:
@@ -13,31 +14,30 @@ spec:
     OpenShift Cluster using Helm
 
   params:
-    - name: charts_dir
+    - name: chartsDirectory
       description: The directory in source that contains the helm chart
-    - name: release_version
+    - name: releaseVersion
       description: The helm release version in semantic versioning format
       default: "v1.0.0"
-    - name: release_name
+    - name: releaseName
       description: The helm release name
       default: "helm-release"
-    - name: release_namespace
+    - name: releaseNamespace
       description: The helm release namespace
       default: ""
-    - name: overwrite_values
+    - name: overwriteValues
       description: "Specify the values you want to overwrite, comma separated: autoscaling.enabled=true,replicas=1"
       default: ""
-    - name: helm_version
+    - name: helmVersion
       description: "Specify a specific helm version"
       default: "latest"
   workspaces:
     - name: source
   steps:
     - name: upgrade
-      image: lachlanevenson/k8s-helm:$(inputs.params.helm_version)
+      image: lachlanevenson/k8s-helm:$(inputs.params.helmVersion)
       workingDir: /workspace/source
       script: |
-        echo Installing Helm chart...
-        helm upgrade --install --wait --namespace "$(inputs.params.release_namespace)" \
-          --version $(inputs.params.release_version) $(inputs.params.release_name) \ 
-          $(inputs.params.charts_dir) --debug --set "$(inputs.params.overwrite_values)"
+        echo Installing Helm chart for resource with tag $(inputs.params.overwriteValues)
+        helm upgrade --install --wait --namespace "$(inputs.params.releaseNamespace)" \
+          --version $(inputs.params.releaseVersion) $(inputs.params.releaseName) $(inputs.params.chartsDirectory) --debug --set "$(inputs.params.overwriteValues)"
