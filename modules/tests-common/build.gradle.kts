@@ -4,6 +4,7 @@ import dependencies.avro4kVersion
 import dependencies.ktorVersion
 import dependencies.coroutinesVersion
 import dependencies.kotlinxSerializationVersion
+import dependencies.kotestVersion
 
 dependencies {
     implementation(project(":modules:kafka-common"))
@@ -20,4 +21,5 @@ dependencies {
     implementation("org.testcontainers:postgresql:${testContainersVersion}")
     implementation("org.testcontainers:testcontainers:${testContainersVersion}")
     implementation("org.mock-server:mockserver-client-java:${mockServerVersion}")
+    implementation("io.kotest:kotest-assertions-core-jvm:${kotestVersion}")
 }
