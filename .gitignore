@@ -25,3 +25,5 @@ out/
 
 # Kotlintest
 **/.kotlintest
+
+logs.txt
