@@ -1,0 +1,6 @@
+port: ${POSTGRES_PORT}
+host: ${POSTGRES_HOST}
+database: ${POSTGRES_DATABASE}
+user: ${POSTGRES_USER}
+password: ${POSTGRES_PASSWORD}
+maxPoolSize: ${POSTGRES_MAX_POOLSIZE}
