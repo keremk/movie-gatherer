@@ -6,15 +6,12 @@ import com.codingventures.movies.dbcommon.utils.bufferTimeout
 import com.codingventures.movies.domain.MovieIndustryData
 import com.codingventures.movies.kafka.KafkaConfigProvider
 import com.codingventures.movies.kafka.KafkaRunner
-import com.codingventures.movies.kafka.KafkaTopics
 import com.sksamuel.avro4k.Avro
-import io.vertx.kotlin.pgclient.PgConnectOptions
 import io.vertx.kotlin.pgclient.pgConnectOptionsOf
 import io.vertx.kotlin.sqlclient.*
 import io.vertx.pgclient.PgException
 import io.vertx.pgclient.PgPool
 import io.vertx.pgclient.SslMode
-import io.vertx.sqlclient.Tuple
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
@@ -51,12 +48,14 @@ class Pipeline<T : MovieIndustryData>(
     val kafkaRunner: KafkaRunner,
     val pgClient: PgPool,
     val consumerTopic: String,
+    val deadLettersTopic: String,
     val deserializer: DeserializationStrategy<T>,
     val prepareStatements: (List<T>) -> List<StatementDeclaration>
 ) {
     @ExperimentalCoroutinesApi
     @ObsoleteCoroutinesApi
     suspend fun run() = coroutineScope {
+        logger.info { "Printing deadletters topic to make sure this works for now $deadLettersTopic" }
         val topicChannel = Channel<ConsumerRecords<String, GenericRecord>>()
         val commitRecordsChannel = Channel<Map<TopicPartition, OffsetAndMetadata>>()
         launch(Dispatchers.IO) {
@@ -119,7 +118,7 @@ class Pipeline<T : MovieIndustryData>(
     }
 
     private fun handlePersistenceFailure(e: PipelineStageException) {
-        logger.error { "Persistence of ${e.record} is not valid, skipping task: ${e.inner.message}" }
+        logger.error { "Persistence of ${e.record} failed, skipping task: ${e.inner.message}" }
     }
 
     companion object {
@@ -127,19 +126,20 @@ class Pipeline<T : MovieIndustryData>(
             kafkaConfigProvider: KafkaConfigProvider = KafkaConfigProvider.default(),
             pgConfigProvider: PgConfigProvider = PgConfigProvider.default(),
             consumerTopic: String,
+            deadLettersTopic: String,
             deserializer: DeserializationStrategy<T>,
             prepareStatements: (List<T>) -> List<StatementDeclaration>
         ): Pipeline<T> {
-            require(consumerTopic == kafkaConfigProvider.kafkaTopics.movies ||
-                    consumerTopic == kafkaConfigProvider.kafkaTopics.people
-            )
             val kafkaRunner = KafkaRunner.initialize(kafkaConfigProvider)
             val pgClient = initializeDB(pgConfigProvider)
+
+            printInitializedMessage(kafkaConfigProvider, consumerTopic, deadLettersTopic, pgConfigProvider)
 
             return Pipeline<T>(
                 kafkaRunner = kafkaRunner,
                 pgClient = pgClient,
                 consumerTopic = consumerTopic,
+                deadLettersTopic = deadLettersTopic,
                 deserializer = deserializer,
                 prepareStatements = prepareStatements
             )
@@ -163,7 +163,10 @@ class Pipeline<T : MovieIndustryData>(
         }
 
         private fun printInitializedMessage(
-            kafkaConfigProvider: KafkaConfigProvider
+            kafkaConfigProvider: KafkaConfigProvider,
+            consumerTopic: String,
+            deadLettersTopic: String,
+            pgConfigProvider: PgConfigProvider
         ) = logger.info {  """
                 Ingester pipeline initialized with:
                 Kafka Configuration: 
@@ -175,10 +178,15 @@ class Pipeline<T : MovieIndustryData>(
                 Enable Auto Commit: ${kafkaConfigProvider.consumerSettings.enableAutoCommit} 
                 Topics: 
                 ------- 
-                Movies Topic: ${kafkaConfigProvider.kafkaTopics.movies} 
-                People Topic: ${kafkaConfigProvider.kafkaTopics.people} 
-                Tasks Topic: ${kafkaConfigProvider.kafkaTopics.tasks} 
-                Deadletters Topic: ${kafkaConfigProvider.kafkaTopics.deadLetters} 
+                Movies Topic: $consumerTopic
+                Deadletters Topic: $deadLettersTopic 
+                PostgreSQL Configuration:
+                -------------------------
+                Host: ${pgConfigProvider.host}
+                Port: ${pgConfigProvider.port}
+                Database: ${pgConfigProvider.database}
+                User: ${pgConfigProvider.user}
+                Max Pool Size: ${pgConfigProvider.maxPoolSize}
             """.trimIndent()
         }
     }

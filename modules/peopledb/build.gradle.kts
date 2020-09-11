@@ -8,6 +8,7 @@ import dependencies.avro4kVersion
 import dependencies.avroSerializerVersion
 import dependencies.kafkaVersion
 import dependencies.postgresVersion
+import dependencies.hopliteVersion
 
 buildscript {
     dependencies {
@@ -33,6 +34,8 @@ dependencies {
     implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
     implementation("io.vertx:vertx-pg-client:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
+    implementation("com.sksamuel.hoplite:hoplite-core:$hopliteVersion")
+    implementation("com.sksamuel.hoplite:hoplite-yaml:$hopliteVersion")
 
     testImplementation("io.confluent:kafka-avro-serializer:${avroSerializerVersion}")
     testImplementation("org.apache.kafka:kafka-clients:${kafkaVersion}")

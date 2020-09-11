@@ -17,7 +17,7 @@ import io.vertx.pgclient.PgException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @ExperimentalCoroutinesApi
-class MoviesDbTests : ShouldSpec() {
+class PeopleDbTests : ShouldSpec() {
     private lateinit var pgConfigProvider: PgConfigProvider
 
     override fun isolationMode(): IsolationMode? = IsolationMode.InstancePerTest
@@ -28,7 +28,7 @@ class MoviesDbTests : ShouldSpec() {
     }
 
     init {
-        should("Persist single movie to DB") {
+        should("Persist single person to DB") {
             val pgClient = connectToDb(pgConfigProvider)
             val dbService = DBService.initialize(pgClient)
             val statements = Statements(listOf(mockPersonDetailsList[1]))
@@ -55,7 +55,7 @@ class MoviesDbTests : ShouldSpec() {
             pgClient.close()
         }
 
-        should("Persist the same movie only once to DB") {
+        should("Persist the same person only once to DB") {
             val pgClient = connectToDb(pgConfigProvider)
             val dbService = DBService.initialize(pgClient)
             val statements = Statements(listOf(mockPersonDetailsList[1]))
@@ -77,7 +77,7 @@ class MoviesDbTests : ShouldSpec() {
             pgClient.close()
         }
 
-        should("Persist the full movie details to its corresponding tables") {
+        should("Persist the full person details to its corresponding tables") {
             val pgClient = connectToDb(pgConfigProvider)
             val dbService = DBService.initialize(pgClient)
             val statements = prepareStatements(mockPersonDetailsList)
@@ -85,10 +85,10 @@ class MoviesDbTests : ShouldSpec() {
             val results = dbService.insert(statements)
             results.count() shouldBe 2
 
-            val movies = pgClient.query("SELECT * FROM people").executeAwait()
-            movies.rowCount() shouldBe 4
-            val releases = pgClient.query("SELECT * FROM pictures").executeAwait()
-            releases.rowCount() shouldBe 8
+            val people = pgClient.query("SELECT * FROM people").executeAwait()
+            people.rowCount() shouldBe 4
+            val pictures = pgClient.query("SELECT * FROM pictures").executeAwait()
+            pictures.rowCount() shouldBe 8
 
             pgClient.close()
         }

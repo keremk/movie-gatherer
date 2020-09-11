@@ -1,5 +1,6 @@
-package com.codingventures.movies.ingester.processor
+package com.codingventures.movies.ingester.tests.unit.processor
 
+import com.codingventures.movies.ingester.processor.ResponseProcessor
 import com.codingventures.movies.ingester.remote.tmdb.response.MovieDetails as MovieDetailsResponse
 import com.codingventures.movies.ingester.remote.tmdb.response.MovieList as MovieListResponse
 import com.codingventures.movies.ingester.remote.tmdb.tasks.movieDetailsFetchTask
@@ -16,11 +17,12 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 
 class ResponseProcessorTests : ShouldSpec() {
-    private val responseProcessor = ResponseProcessor.initialize(
-        maxNoPages = 10,
-        maxNoCrewRequests = 2,
-        maxNoCastRequests = 2
-    )
+    private val responseProcessor =
+        ResponseProcessor.initialize(
+            maxNoPages = 10,
+            maxNoCrewRequests = 2,
+            maxNoCastRequests = 2
+        )
 
     private lateinit var movieListFirstPage: MovieListResponse
     private lateinit var movieListLastPage: MovieListResponse

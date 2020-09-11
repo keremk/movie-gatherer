@@ -1,11 +1,12 @@
-package com.codingventures.movies.ingester.producer
+package com.codingventures.movies.ingester.tests.unit.producer
 
 import com.codingventures.movies.domain.MovieDetails
 import com.codingventures.movies.domain.FetchTask
 import com.codingventures.movies.domain.ProductionTask
+import com.codingventures.movies.ingester.config.KafkaTopicsProvider
+import com.codingventures.movies.ingester.producer.Producers
 import com.codingventures.movies.ingester.remote.tmdb.tasks.personDetailsFetchTask
 import com.codingventures.movies.ingester.testutils.MockKafkaAvroGenericRecordSerializer
-import com.codingventures.movies.kafka.KafkaTopics
 import com.codingventures.movies.mockdata.domain.mockMovieDetails
 import com.sksamuel.avro4k.Avro
 import io.kotest.core.spec.style.ShouldSpec
@@ -24,7 +25,12 @@ class ProducersTests : ShouldSpec() {
         should("only produce new fetch tasks when there is no new data") {
             val producers = Producers(
                 kafkaProducer = MockProducer(true, StringSerializer(), MockKafkaAvroGenericRecordSerializer()),
-                topics = KafkaTopics(movies = "testmovies", people = "testpeople", tasks = "testtasks", deadLetters = "testLetters")
+                topics = KafkaTopicsProvider(
+                    movies = "testmovies",
+                    people = "testpeople",
+                    tasks = "testtasks",
+                    deadLetters = "testLetters"
+                )
             )
             val input = ProductionTask(
                 movieIndustryData = null,
@@ -43,7 +49,12 @@ class ProducersTests : ShouldSpec() {
         should("produce both movie industry data and fetch tasks when there is both") {
             val producers = Producers(
                 kafkaProducer = MockProducer(true, StringSerializer(), MockKafkaAvroGenericRecordSerializer()),
-                topics = KafkaTopics(movies = "testmovies", people = "testpeople", tasks = "testtasks", deadLetters = "testLetters")
+                topics = KafkaTopicsProvider(
+                    movies = "testmovies",
+                    people = "testpeople",
+                    tasks = "testtasks",
+                    deadLetters = "testLetters"
+                )
             )
             val input = ProductionTask(
                 movieIndustryData = mockMovieDetails,

@@ -1,0 +1,4 @@
+tasks: ${TASKS_TOPIC}
+people: ${PEOPLE_TOPIC}
+movies: ${MOVIES_TOPIC}
+deadLetters: ${DEADLETTERS_TOPIC}

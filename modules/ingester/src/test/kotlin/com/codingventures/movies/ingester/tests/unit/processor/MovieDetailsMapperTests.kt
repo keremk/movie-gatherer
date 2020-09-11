@@ -1,6 +1,7 @@
-package com.codingventures.movies.ingester.processor
+package com.codingventures.movies.ingester.tests.unit.processor
 
 import com.codingventures.movies.domain.*
+import com.codingventures.movies.ingester.processor.*
 import com.codingventures.movies.ingester.remote.tmdb.response.*
 import com.codingventures.movies.ingester.remote.tmdb.response.Release as ReleaseResponse
 import com.codingventures.movies.ingester.remote.tmdb.response.Genre as GenreResponse
@@ -88,7 +89,7 @@ class MovieDetailsMapperTests : ShouldSpec() {
                         date = LocalDate.of(2016, 10, 19),
                         certification = Certification.Rated_Unspecified,
                         releaseType = ReleaseType.Premiere,
-                        language = LanguageCode.unspecified
+                        language = LanguageCode.bo
                     )),
                 "GB" to listOf(
                     Release(

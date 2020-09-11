@@ -7,9 +7,9 @@ import com.codingventures.movies.dbcommon.utils.connectToDb
 import com.codingventures.movies.domain.MovieDetails
 import com.codingventures.movies.kafka.ConsumerSettings
 import com.codingventures.movies.kafka.KafkaConfigProvider
-import com.codingventures.movies.kafka.KafkaTopics
 import com.codingventures.movies.kafka.dispatchRecord
 import com.codingventures.movies.mockdata.domain.mockMovies
+import com.codingventures.movies.moviesdb.config.KafkaTopicsProvider
 import com.codingventures.movies.moviesdb.mapper.prepareStatements
 import com.codingventures.movies.moviesdb.tests.utils.initializeTargetDb
 import com.codingventures.movies.utils.equalTo
@@ -21,6 +21,7 @@ import io.kotest.core.spec.Spec
 import io.kotest.core.spec.style.ShouldSpec
 import io.vertx.kotlin.sqlclient.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
@@ -30,17 +31,16 @@ import org.apache.kafka.clients.producer.ProducerRecord
 
 private val logger = KotlinLogging.logger {}
 
+@ObsoleteCoroutinesApi
 @ExperimentalCoroutinesApi
 class EndToEndTests : ShouldSpec() {
     private lateinit var sutRunner: Pipeline<MovieDetails>
     private lateinit var producer: KafkaProducer<String, GenericRecord>
     private lateinit var pgConfigProvider: PgConfigProvider
 
-    private val kafkaTopics = KafkaTopics(
+    private val kafkaTopics = KafkaTopicsProvider(
         movies = "movies",
-        people = "people",
-        deadLetters = "deadletters",
-        tasks = "tasks"
+        deadLetters = "deadletters"
     )
 
     override fun isolationMode(): IsolationMode? = IsolationMode.InstancePerTest
@@ -52,7 +52,7 @@ class EndToEndTests : ShouldSpec() {
     }
 
     private fun initializeKafkaSystem() {
-        val serverConfig = TestKafkaSystem.initialize()
+        val serverConfig = TestKafkaSystem.initialize(kafkaTopics.toList())
 
         val sutKafkaConfigProvider = KafkaConfigProvider(
             serverConfig = serverConfig,
@@ -60,20 +60,19 @@ class EndToEndTests : ShouldSpec() {
                 enableAutoCommit = false,
                 maxPollRecords = 10,
                 consumerGroupId = "sut-kafka-consumer"
-            ),
-            kafkaTopics = kafkaTopics
+            )
         )
 
         sutRunner = Pipeline.initialize(
             kafkaConfigProvider = sutKafkaConfigProvider,
             pgConfigProvider = pgConfigProvider,
             consumerTopic = kafkaTopics.movies,
+            deadLettersTopic = kafkaTopics.deadLetters,
             deserializer = MovieDetails.serializer(),
             prepareStatements = ::prepareStatements
         )
 
-        producer = KafkaProducer<String, GenericRecord>(sutKafkaConfigProvider.producerProperties())
-
+        producer = KafkaProducer(sutKafkaConfigProvider.producerProperties())
     }
 
     private suspend fun produce(movieDetails: MovieDetails) {

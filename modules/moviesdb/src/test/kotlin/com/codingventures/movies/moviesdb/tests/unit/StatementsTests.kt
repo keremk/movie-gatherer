@@ -1,4 +1,4 @@
-package com.codingventures.movies.moviesdb.tests.mapper
+package com.codingventures.movies.moviesdb.tests.unit
 
 import com.codingventures.movies.mockdata.domain.mockMovies
 import com.codingventures.movies.moviesdb.mapper.Statements

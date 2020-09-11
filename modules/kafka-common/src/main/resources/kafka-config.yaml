@@ -6,9 +6,3 @@ consumerSettings:
   maxPollRecords: ${MAX_POLL_RECORDS}
   consumerGroupId: ${CONSUMER_GROUP_ID}
   enableAutoCommit: ${ENABLE_AUTO_COMMIT}
-
-kafkaTopics:
-  tasks: ${TASKS_TOPIC}
-  people: ${PEOPLE_TOPIC}
-  movies: ${MOVIES_TOPIC}
-  deadLetters: ${DEADLETTERS_TOPIC}

@@ -8,6 +8,7 @@ import dependencies.kafkaVersion
 import dependencies.kotlinLogVersion
 import dependencies.simpleLogVersion
 import dependencies.kotestVersion
+import dependencies.testContainersVersion
 
 plugins {
     id("com.google.cloud.tools.jib")
@@ -34,18 +35,5 @@ dependencies {
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
     testImplementation("io.ktor:ktor-client-mock-jvm:$ktorVersion")
     testImplementation("io.kotest:kotest-runner-console-jvm:$kotestVersion")
+    testImplementation("org.testcontainers:testcontainers:$testContainersVersion")
 }
-
-val hostname = System.getenv("REGISTRY_CONTAINER-REGISTRY_SERVICE_HOST")
-val hostPort = System.getenv("REGISTRY_SERVICE_PORT")
-
-//jib {
-//    to {
-////        image = "192.168.1.78:32000/${project.name}:${version}"
-//        image = "${hostname}:32000/${project.name}:${version}"
-//    }
-////    from {
-////        image = "gcr.io/distroless/java:11"
-////    }
-//    setAllowInsecureRegistries(true)
-//}

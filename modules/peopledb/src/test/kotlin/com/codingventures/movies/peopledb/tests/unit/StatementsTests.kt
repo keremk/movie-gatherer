@@ -1,4 +1,4 @@
-package com.codingventures.movies.peopledb.tests.mapper
+package com.codingventures.movies.peopledb.tests.unit
 
 import com.codingventures.movies.mockdata.domain.mockPersonDetailsList
 import com.codingventures.movies.peopledb.mapper.Statements
@@ -23,7 +23,7 @@ class StatementsTests : ShouldSpec() {
             batchData.count() shouldBe 8
 
             val insertStatement = picturesStatement.insertStatement
-            insertStatement shouldBe """INSERT INTO pictures (id,person_urn,path,width,height) VALUES ($1,$2,$3,$4,$5) ON CONFLICT (id) DO NOTHING"""
+            insertStatement shouldBe """INSERT INTO pictures (person_urn,path,width,height) VALUES ($1,$2,$3,$4) ON CONFLICT (id) DO NOTHING"""
         }
     }
 }

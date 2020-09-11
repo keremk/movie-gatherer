@@ -16,7 +16,6 @@ include(
     ":modules:moviesdb",
     ":modules:peopledb",
     ":modules:kafka-common",
-    ":modules:ingester-integration-tests",
     ":modules:tests-common",
     ":modules:db-common",
     ":modules:db-annotation",
@@ -27,7 +26,6 @@ include(
 project(":modules:ingester").name = "ingester"
 project(":modules:moviesdb").name = "moviesdb"
 project(":modules:peopledb").name = "peopledb"
-project(":modules:ingester-integration-tests").name = "ingester-integration-tests"
 
 // Common Libraries
 project(":modules:movies-domain").name = "movies-domain"

@@ -6,6 +6,7 @@ import com.codingventures.movies.ingester.producer.ResultsProductionException
 import com.codingventures.movies.ingester.producer.TaskProducer
 import com.codingventures.movies.domain.FetchTask
 import com.codingventures.movies.domain.ProductionTask
+import com.codingventures.movies.ingester.config.KafkaTopicsProvider
 import com.codingventures.movies.ingester.processor.ResponseProcessor
 import com.codingventures.movies.ingester.remote.tmdb.config.RemoteConfigProvider
 import com.codingventures.movies.ingester.remote.tmdb.fetchers.FetchOperationException
@@ -14,7 +15,6 @@ import com.codingventures.movies.ingester.remote.tmdb.fetchers.TmdbClient
 import com.codingventures.movies.ingester.remote.tmdb.response.TmdbResponse
 import com.codingventures.movies.kafka.KafkaConfigProvider
 import com.codingventures.movies.kafka.KafkaRunner
-import com.codingventures.movies.kafka.KafkaTopics
 import com.sksamuel.avro4k.Avro
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
@@ -56,7 +56,7 @@ class Pipeline(
     val kafkaRunner: KafkaRunner,
     val producers: Producers,
     val remoteClient: RemoteClient,
-    val topics: KafkaTopics,
+    val topics: KafkaTopicsProvider,
     val responseProcessor: ResponseProcessor
 ) {
 
@@ -189,6 +189,7 @@ class Pipeline(
     companion object {
         fun initialize(
             kafkaConfigProvider: KafkaConfigProvider = KafkaConfigProvider.default(),
+            kafkaTopicsProvider: KafkaTopicsProvider = KafkaTopicsProvider.default(),
             remoteConfigProvider: RemoteConfigProvider = RemoteConfigProvider.default()
         ): Pipeline {
             val httpClient = HttpClient(CIO) {
@@ -201,24 +202,25 @@ class Pipeline(
             val tmdbClient = TmdbClient(httpClient, remoteConfigProvider)
             val kafkaRunner = KafkaRunner.initialize(kafkaConfigProvider)
             val kafkaProducer = KafkaProducer<String, GenericRecord>(kafkaConfigProvider.producerProperties())
-            val producers = Producers(kafkaProducer, kafkaConfigProvider.kafkaTopics)
+            val producers = Producers(kafkaProducer, kafkaTopicsProvider)
             val responseProcessor = ResponseProcessor.initialize(
                 maxNoCrewRequests = remoteConfigProvider.maxNoCrewRequests,
                 maxNoCastRequests = remoteConfigProvider.maxNoCastRequests,
                 maxNoPages = remoteConfigProvider.maxNoPages
             )
-            printInitializedMessage(kafkaConfigProvider, remoteConfigProvider)
+            printInitializedMessage(kafkaConfigProvider, kafkaTopicsProvider, remoteConfigProvider)
             return Pipeline(
                 kafkaRunner = kafkaRunner,
                 producers = producers,
                 remoteClient = tmdbClient,
-                topics = kafkaConfigProvider.kafkaTopics,
+                topics = kafkaTopicsProvider,
                 responseProcessor = responseProcessor
             )
         }
 
         private fun printInitializedMessage(
             kafkaConfigProvider: KafkaConfigProvider,
+            kafkaTopicsProvider: KafkaTopicsProvider,
             remoteConfigProvider: RemoteConfigProvider
         ) = logger.info {  """
                 Ingester pipeline initialized with:
@@ -231,10 +233,10 @@ class Pipeline(
                 Enable Auto Commit: ${kafkaConfigProvider.consumerSettings.enableAutoCommit} 
                 Topics: 
                 ------- 
-                Movies Topic: ${kafkaConfigProvider.kafkaTopics.movies} 
-                People Topic: ${kafkaConfigProvider.kafkaTopics.people} 
-                Tasks Topic: ${kafkaConfigProvider.kafkaTopics.tasks} 
-                Deadletters Topic: ${kafkaConfigProvider.kafkaTopics.deadLetters} 
+                Movies Topic: ${kafkaTopicsProvider.movies} 
+                People Topic: ${kafkaTopicsProvider.people} 
+                Tasks Topic: ${kafkaTopicsProvider.tasks} 
+                Deadletters Topic: ${kafkaTopicsProvider.deadLetters} 
                 TMDB Configuration: 
                 ------------------- 
                 Hostname: ${remoteConfigProvider.host} 

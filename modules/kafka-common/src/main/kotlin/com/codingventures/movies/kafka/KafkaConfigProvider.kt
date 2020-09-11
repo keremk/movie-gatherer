@@ -17,17 +17,10 @@ data class ServerConfig(
     val bootstrapServers: String,
     val schemaRegistryUrl: String)
 
-data class KafkaTopics(
-    val movies: String,
-    val people: String,
-    val tasks: String,
-    val deadLetters: String
-)
-
 data class KafkaConfigProvider(
     val consumerSettings: ConsumerSettings,
-    val serverConfig: ServerConfig,
-    val kafkaTopics: KafkaTopics) {
+    val serverConfig: ServerConfig
+) {
 
     fun consumerProperties(): Map<String, Any?> {
         return mapOf(

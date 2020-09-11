@@ -1,7 +1,7 @@
 package com.codingventures.movies.ingester.producer
 
 import com.codingventures.movies.domain.*
-import com.codingventures.movies.kafka.KafkaTopics
+import com.codingventures.movies.ingester.config.KafkaTopicsProvider
 import com.codingventures.movies.kafka.dispatchRecord
 import com.sksamuel.avro4k.Avro
 import mu.KotlinLogging
@@ -20,7 +20,7 @@ data class ResultsProductionException(
 
 class Producers(
     val kafkaProducer: Producer<String, GenericRecord>,
-    val topics: KafkaTopics
+    val topics: KafkaTopicsProvider
 ) {
     suspend fun produce(input: Producable) = when (input) {
         is MovieIndustryDataProducer -> input.produce(kafkaProducer, topics)
@@ -44,14 +44,14 @@ class Producers(
 }
 
 sealed class Producable() {
-    abstract suspend fun produce(kafkaProducer: Producer<String, GenericRecord>, topics: KafkaTopics): Unit
+    abstract suspend fun produce(kafkaProducer: Producer<String, GenericRecord>, topics: KafkaTopicsProvider): Unit
 }
 
 class MovieIndustryDataProducer(
     val data: MovieIndustryData
 ) : Producable() {
 
-    override suspend fun produce(kafkaProducer: Producer<String, GenericRecord>, topics: KafkaTopics) =
+    override suspend fun produce(kafkaProducer: Producer<String, GenericRecord>, topics: KafkaTopicsProvider) =
         when (data) {
             is MovieDetails -> MovieDetailsProducer(data).produce(kafkaProducer, topics)
             is PersonDetails -> PersonDetailsProducer(data).produce(kafkaProducer, topics)
@@ -62,7 +62,7 @@ class MovieDetailsProducer(
     val movieDetails: MovieDetails
 ) : Producable() {
 
-    override suspend fun produce(kafkaProducer: Producer<String, GenericRecord>, topics: KafkaTopics): Unit {
+    override suspend fun produce(kafkaProducer: Producer<String, GenericRecord>, topics: KafkaTopicsProvider): Unit {
         val record = Avro.default.toRecord(MovieDetails.serializer(), movieDetails)
         val key = movieDetails.movieUrn.toString()
 
@@ -75,7 +75,7 @@ class PersonDetailsProducer(
     val personDetails: PersonDetails
 ) : Producable() {
 
-    override suspend fun produce(kafkaProducer: Producer<String, GenericRecord>, topics: KafkaTopics) {
+    override suspend fun produce(kafkaProducer: Producer<String, GenericRecord>, topics: KafkaTopicsProvider) {
         val record = Avro.default.toRecord(PersonDetails.serializer(), personDetails)
         val key = personDetails.personUrn.toString()
 
@@ -89,7 +89,7 @@ class TaskProducer(
     val topic: String
 ) : Producable() {
 
-    override suspend fun produce(kafkaProducer: Producer<String, GenericRecord>, topics: KafkaTopics) {
+    override suspend fun produce(kafkaProducer: Producer<String, GenericRecord>, topics: KafkaTopicsProvider) {
         tasks.forEach { task ->
             val jobRecord = Avro.default.toRecord(FetchTask.serializer(), task)
             val key = UUID.randomUUID().toString()

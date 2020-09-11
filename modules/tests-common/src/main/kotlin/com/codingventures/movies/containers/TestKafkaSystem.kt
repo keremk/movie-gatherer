@@ -44,13 +44,18 @@ object TestKafkaSystem {
         return "http://$host:$port"
     }
 
-    fun initialize(): ServerConfig {
+    fun initialize(topics: List<String> = emptyList()): ServerConfig {
         if (kafkaInitialized.compareAndSet(false, true)) {
             kafka.start()
         }
 
         if (schemaRegistryInitialized.compareAndSet(false, true)) {
             schemaRegistry.start()
+        }
+
+        if (!topics.isEmpty()) {
+            deleteTopics(topics)
+            createTopics(topics)
         }
 
         return ServerConfig(

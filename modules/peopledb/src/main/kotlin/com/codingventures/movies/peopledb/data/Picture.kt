@@ -6,7 +6,7 @@ import kotlinx.serialization.SerialName
 
 @Table("pictures", primaryKey = "id")
 data class Picture(
-    @Column("id")
+    @Column("id", exclude = true)
     val id: Int,
     @Column("person_urn")
     val personUrn: String,

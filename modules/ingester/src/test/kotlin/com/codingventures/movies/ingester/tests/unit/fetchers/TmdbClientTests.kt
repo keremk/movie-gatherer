@@ -1,6 +1,8 @@
-package com.codingventures.movies.ingester.remote.tmdb.fetchers
+package com.codingventures.movies.ingester.tests.unit.fetchers
 
 import com.codingventures.movies.ingester.remote.tmdb.config.RemoteConfigProvider
+import com.codingventures.movies.ingester.remote.tmdb.fetchers.FetchOperationException
+import com.codingventures.movies.ingester.remote.tmdb.fetchers.TmdbClient
 import com.codingventures.movies.ingester.remote.tmdb.response.MovieDetails
 import com.codingventures.movies.ingester.remote.tmdb.response.MovieList
 import com.codingventures.movies.ingester.remote.tmdb.response.MovieReference
@@ -74,7 +76,10 @@ class TmdbClientTests : ShouldSpec() {
 
     init {
         should("return movie list") {
-            val tmdbClient = TmdbClient(httpClient, config)
+            val tmdbClient = TmdbClient(
+                httpClient,
+                config
+            )
             val result = tmdbClient.fetchData(popularMoviesFetchTask(1))
             result should beOfType<MovieList>()
             val movieList = result as MovieList
@@ -85,21 +90,30 @@ class TmdbClientTests : ShouldSpec() {
             movieList.results[0].id shouldBe 419704
         }
         should("return movie details") {
-            val tmdbClient = TmdbClient(httpClient, config)
+            val tmdbClient = TmdbClient(
+                httpClient,
+                config
+            )
             val result = tmdbClient.fetchData(movieDetailsFetchTask("12345"))
             result should beOfType<MovieDetails>()
             val movieDetails = result as MovieDetails
             movieDetails.title shouldBe "Spenser Confidential"
         }
         should("return person details") {
-            val tmdbClient = TmdbClient(httpClient, config)
+            val tmdbClient = TmdbClient(
+                httpClient,
+                config
+            )
             val result = tmdbClient.fetchData(personDetailsFetchTask("12345"))
             result should beOfType<PersonDetails>()
             val personDetails = result as PersonDetails
             personDetails.name shouldBe "Brad Pitt"
         }
         should("raise exception if some required fields are missing") {
-            val tmdbClient = TmdbClient(httpClient, config)
+            val tmdbClient = TmdbClient(
+                httpClient,
+                config
+            )
             val exception = shouldThrow<FetchOperationException> {
                 tmdbClient.fetchData(mockMissingFieldsTask)
             }
@@ -107,7 +121,10 @@ class TmdbClientTests : ShouldSpec() {
             exception.inner.message shouldContain "Field 'original_language' is required, but it was missing"
         }
         should("raise an exception for a bad request") {
-            val tmdbClient = TmdbClient(httpClient, config)
+            val tmdbClient = TmdbClient(
+                httpClient,
+                config
+            )
             val exception = shouldThrow<FetchOperationException> {
                 tmdbClient.fetchData(mockBadRequestTask)
             }
@@ -115,7 +132,10 @@ class TmdbClientTests : ShouldSpec() {
             (exception.inner as ClientRequestException).response.status shouldBe HttpStatusCode.BadRequest
         }
         should("raise an exception for unexpected response format") {
-            val tmdbClient = TmdbClient(httpClient, config)
+            val tmdbClient = TmdbClient(
+                httpClient,
+                config
+            )
             val exception = shouldThrow<FetchOperationException> {
                 tmdbClient.fetchData(mockUnexpectedResponseTask)
             }

@@ -1,7 +1,9 @@
-package com.codingventures.movies.ingester.processor
+package com.codingventures.movies.ingester.tests.unit.processor
 
 import com.codingventures.movies.domain.Gender
 import com.codingventures.movies.domain.Picture
+import com.codingventures.movies.ingester.processor.mapGender
+import com.codingventures.movies.ingester.processor.mapPictures
 import com.codingventures.movies.ingester.remote.tmdb.response.Images
 import com.codingventures.movies.ingester.remote.tmdb.response.Profile
 import io.kotest.core.spec.style.ShouldSpec
