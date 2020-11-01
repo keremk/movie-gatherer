@@ -1,0 +1,85 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: deploy-moviedb-pipeline
+  namespace: movie-store
+spec:
+  workspaces:
+  - name: shared-workspace
+  tasks:
+  - name: fetch-repository
+    taskRef:
+      name: git-clone
+    workspaces:
+    - name: output
+      workspace: shared-workspace
+    params:
+    - name: url
+      value: https://github.com/keremk/movie-gatherer
+    - name: subdirectory
+      value: ""
+    - name: deleteExisting
+      value: "true"
+  - name: migrate-database
+    taskRef:
+      name: migrate-db
+    runAfter:
+    - fetch-repository
+    workspaces:
+    - name: source
+      workspace: shared-workspace
+    params:
+    - name: modulePath
+      value: ":modules:moviedb:"  
+    - name: flywayUser
+      value: movieservice
+    - name: flywayPassword
+      value: postgres-moviedb-password
+    - name: flywayJdbcUrl
+      value: "jdbc:postgresql://192.168.1.78:5432/movies"
+  - name: create-image
+    taskRef:
+      name: test-build
+    runAfter:
+    - migrate-database
+    workspaces:
+    - name: source
+      workspace: shared-workspace
+    params:
+    - name: imageUrl
+      value: "192.168.1.78:32000/moviedb"
+    - name: insecureRegistry
+      value: "true"
+    - name: modulePath
+      value: ":modules:moviedb:"  
+    - name: testsFilter
+      value: "com.codingventures.movies.moviesdb.tests.unit*"
+  - name: deploy
+    taskRef:
+      name: helm-upgrade-from-source
+    runAfter: 
+    - create-image
+    workspaces:
+    - name: source
+      workspace: shared-workspace
+    params:
+    - name: chartsDirectory
+      value: "./helm/movie-gatherer/charts/moviedb"
+    - name: overwriteValues
+      value: "imageTag=$(tasks.create-image.results.tag)"
+    - name: releaseNamespace
+      value: "movie-store"
+---
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: deploy-ingester-pipeline-run
+  namespace: movie-store
+spec:
+  serviceAccountName: deploy-pipeline-run-sa
+  pipelineRef:
+    name: deploy-ingester-pipeline
+  workspaces:
+    - name: shared-workspace
+      persistentvolumeclaim:
+        claimName: deploy-ingester-pvc

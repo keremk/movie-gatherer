@@ -1,0 +1,19 @@
+kind: Service
+apiVersion: v1
+metadata: 
+  name: images
+spec:
+  type: ClusterIP
+  ports: 
+  - port: 32000
+    targetPort: 32000
+---
+kind: Endpoints
+apiVersion: v1
+metadata:
+  name: images
+subsets:
+- addresses:
+  - ip: {{ .Values.imageRegistryIp }}
+  ports:
+  - port: 32000

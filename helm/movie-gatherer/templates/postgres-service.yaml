@@ -1,0 +1,19 @@
+kind: Service
+apiVersion: v1
+metadata: 
+  name: postgres
+spec:
+  type: ClusterIP
+  ports: 
+  - port: 5242
+    targetPort: 5242
+---
+kind: Endpoints
+apiVersion: v1
+metadata:
+  name: postgres
+subsets:
+- addresses:
+  - ip: {{ .Values.postgresIp }}
+  ports:
+  - port: 5242

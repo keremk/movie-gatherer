@@ -1,0 +1,8 @@
+apiVersion: v2
+name: peopledb
+version: "0.0.1"
+description: Microservice that listens to people topics and persist them in PostgreSQL
+sources:
+    - https://github.com/keremk/movie-gatherer
+maintainers:
+    - name: Kerem Karatal

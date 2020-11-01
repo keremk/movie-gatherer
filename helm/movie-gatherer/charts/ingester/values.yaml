@@ -1,4 +1,4 @@
-imageRegistry: "localhost:32000"
+imageRegistry: "images:32000"
 imageTag: "0"
 replicaCount: 1
 tmdb:
@@ -10,10 +10,10 @@ kafka:
     maxPollRecords: 100
     consumerGroupId: movies-ingester
     enableAutoCommit: false
-    bootstrapServers: "PLAINTEXT://192.168.1.78:9092"
-    schemaRegistryUrl: "http://192.168.1.78:8081"
+    bootstrapServers: "PLAINTEXT://kafka:9092"
+    schemaRegistryUrl: "http://schemas:8081"
 topics:
-    tasks: tasks
-    people: people
-    movies: movies
-    deadLetters: deadletters
+    tasks: local.movies.fct.tmdb-tasks.0
+    people: local.movies.fct.people.0
+    movies: local.movies.fct.movies.0
+    deadLetters: local.movies.sys.tmdb-tasks-errors.0

@@ -1,0 +1,4 @@
+kafkaIp: 192.168.1.78
+schemaRegistryIp: 192.168.1.78
+postgresIp: 192.168.1.78
+imageRegistryIp: 192.168.1.78

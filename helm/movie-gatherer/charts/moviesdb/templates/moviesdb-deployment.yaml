@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: moviesdb-deployment
+  namespace: {{ .Release.Namespace }}
+  labels: 
+    app: moviesdb
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: moviesdb
+  template:
+    metadata:
+      labels:
+        app: moviesdb     
+    spec:
+      containers:
+      - name: moviesdb
+        image: "{{ .Values.imageRegistry }}/moviesdb:{{ .Values.imageTag }}"
+        env:
+        - name: BOOTSTRAP_SERVERS_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: moviesdb-config
+              key: bootstrapServers
+        - name: SCHEMA_REGISTRY_URL
+          valueFrom:
+            configMapKeyRef:
+              name: moviesdb-config
+              key: schemaRegistryUrl
+        - name: MAX_POLL_RECORDS
+          valueFrom:
+            configMapKeyRef:
+              name: moviesdb-config
+              key: maxPollRecords
+        - name: CONSUMER_GROUP_ID
+          valueFrom:
+            configMapKeyRef:
+              name: moviesdb-config
+              key: consumerGroupId
+        - name: ENABLE_AUTO_COMMIT
+          valueFrom:
+            configMapKeyRef:
+              name: moviesdb-config
+              key: enableAutoCommit
+        - name: MOVIESDB_MOVIES_TOPIC
+          valueFrom:
+            configMapKeyRef:
+              name: moviesdb-config
+              key: moviesTopic
+        - name: MOVIESDB_DEADLETTERS_TOPIC
+          valueFrom:
+            configMapKeyRef:
+              name: moviesdb-config
+              key: deadLettersTopic
+        - name: POSTGRES_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: moviesdb-config
+              key: pgHost
+        - name: POSTGRES_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: moviesdb-config
+              key: pgPort
+        - name: POSTGRES_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: moviesdb-config
+              key: pgDatabase
+        - name: POSTGRES_USER
+          valueFrom:
+            configMapKeyRef:
+              name: moviesdb-config
+              key: pgUser
+        - name: POSTGRES_MAX_POOLSIZE
+          valueFrom:
+            configMapKeyRef:
+              name: moviesdb-config
+              key: pgMaxPoolSize
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-moviedb-password
+              key: movieDbPassword                

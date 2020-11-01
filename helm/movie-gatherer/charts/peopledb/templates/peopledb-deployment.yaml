@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: peopledb-deployment
+  namespace: {{ .Release.Namespace }}
+  labels: 
+    app: peopledb
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: peopledb
+  template:
+    metadata:
+      labels:
+        app: peopledb     
+    spec:
+      containers:
+      - name: peopledb
+        image: "{{ .Values.imageRegistry }}/peopledb:{{ .Values.imageTag }}"
+        env:
+        - name: BOOTSTRAP_SERVERS_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: peopledb-config
+              key: bootstrapServers
+        - name: SCHEMA_REGISTRY_URL
+          valueFrom:
+            configMapKeyRef:
+              name: peopledb-config
+              key: schemaRegistryUrl
+        - name: MAX_POLL_RECORDS
+          valueFrom:
+            configMapKeyRef:
+              name: peopledb-config
+              key: maxPollRecords
+        - name: CONSUMER_GROUP_ID
+          valueFrom:
+            configMapKeyRef:
+              name: peopledb-config
+              key: consumerGroupId
+        - name: ENABLE_AUTO_COMMIT
+          valueFrom:
+            configMapKeyRef:
+              name: peopledb-config
+              key: enableAutoCommit
+        - name: PEOPLEDB_PEOPLE_TOPIC
+          valueFrom:
+            configMapKeyRef:
+              name: peopledb-config
+              key: moviesTopic
+        - name: PEOPLEDB_DEADLETTERS_TOPIC
+          valueFrom:
+            configMapKeyRef:
+              name: peopledb-config
+              key: deadLettersTopic
+        - name: POSTGRES_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: peopledb-config
+              key: pgHost
+        - name: POSTGRES_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: peopledb-config
+              key: pgPort
+        - name: POSTGRES_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: peopledb-config
+              key: pgDatabase
+        - name: POSTGRES_USER
+          valueFrom:
+            configMapKeyRef:
+              name: peopledb-config
+              key: pgUser
+        - name: POSTGRES_MAX_POOLSIZE
+          valueFrom:
+            configMapKeyRef:
+              name: peopledb-config
+              key: pgMaxPoolSize
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-peopledb-password
+              key: peopleDbPassword                
