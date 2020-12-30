@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: moviesdb
-        image: "{{ .Values.imageRegistry }}/moviesdb:{{ .Values.imageTag }}"
+        image: "{{ .Values.imageRegistry }}/moviedb:{{ .Values.imageTag }}"
         env:
         - name: BOOTSTRAP_SERVERS_CONFIG
           valueFrom:
@@ -83,4 +83,4 @@ spec:
           valueFrom:
             secretKeyRef:
               name: postgres-moviedb-password
-              key: movieDbPassword                
+              key: password                

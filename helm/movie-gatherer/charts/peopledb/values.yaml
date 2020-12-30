@@ -1,12 +1,12 @@
-imageRegistry: "images:32000"
+imageRegistry: "localhost:32000"
 imageTag: "0"
 replicaCount: 1
 kafka: 
     maxPollRecords: 100
     consumerGroupId: peopledb
     enableAutoCommit: false
-    bootstrapServers: "PLAINTEXT://kafka:9092"
-    schemaRegistryUrl: "http://schemas:8081"
+    bootstrapServers: "PLAINTEXT://kafka.movie-store:9092"
+    schemaRegistryUrl: "http://schemas.movie-store:8081"
 topics:
     people: local.movies.fct.people.0
     deadLetters: local.movies.sys.people-errors.0
@@ -14,5 +14,5 @@ postgres:
     user: peopleservice
     database: people
     port: 5432
-    host: postgres
+    host: postgres.movie-store
     maxPoolSize: 20

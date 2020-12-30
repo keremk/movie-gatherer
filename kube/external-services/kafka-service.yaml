@@ -2,6 +2,7 @@ kind: Service
 apiVersion: v1
 metadata: 
   name: kafka
+  namespace: movie-store
 spec:
   type: ClusterIP
   ports: 
@@ -12,8 +13,9 @@ kind: Endpoints
 apiVersion: v1
 metadata:
   name: kafka
+  namespace: movie-store
 subsets:
 - addresses:
-  - ip: {{ .Values.kafkaIp }}
+  - ip: 192.168.1.78
   ports:
   - port: 9092

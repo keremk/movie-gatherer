@@ -1,12 +1,12 @@
-imageRegistry: "images:32000"
+imageRegistry: "localhost:32000"
 imageTag: "0"
 replicaCount: 1
 kafka: 
     maxPollRecords: 100
     consumerGroupId: moviesdb
     enableAutoCommit: false
-    bootstrapServers: "PLAINTEXT://kafka:9092"
-    schemaRegistryUrl: "http://schemas:8081"
+    bootstrapServers: "PLAINTEXT://kafka.movie-store:9092"
+    schemaRegistryUrl: "http://schemas.movie-store:8081"
 topics:
     movies: local.movies.fct.movies.0
     deadLetters: local.movies.sys.movies-errors.0
@@ -14,6 +14,5 @@ postgres:
     user: movieservice
     database: movies
     port: 5432
-    host: postgres
+    host: postgres.movie-store
     maxPoolSize: 20
-
