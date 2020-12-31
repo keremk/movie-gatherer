@@ -82,5 +82,5 @@ spec:
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: postgres-peopledb-password
+              name: postgres-peopledb
               key: password                

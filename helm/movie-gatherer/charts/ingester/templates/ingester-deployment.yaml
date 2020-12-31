@@ -87,5 +87,5 @@ spec:
         - name: TMDB_APIKEY
           valueFrom:
             secretKeyRef:
-              name: tmdb-secret
-              key: tmdbApiKey                
+              name: tmdb-api-key
+              key: apiKey                
