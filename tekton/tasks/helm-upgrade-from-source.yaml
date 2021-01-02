@@ -18,7 +18,7 @@ spec:
       description: The directory in source that contains the helm chart
     - name: releaseVersion
       description: The helm release version in semantic versioning format
-      default: "v1.0.0"
+      default: "0.0.1"
     - name: releaseName
       description: The helm release name
       default: "helm-release"
@@ -31,6 +31,9 @@ spec:
     - name: helmVersion
       description: "Specify a specific helm version"
       default: "latest"
+    - name: timeout
+      description: "Specify the timeout in seconds for helm to wait for all pods to start. Default is 300 seconds"
+      default: "300s"
   workspaces:
     - name: source
   steps:
@@ -38,6 +41,6 @@ spec:
       image: lachlanevenson/k8s-helm:$(inputs.params.helmVersion)
       workingDir: /workspace/source
       script: |
-        echo Installing Helm chart for resource with tag $(inputs.params.overwriteValues)
-        helm upgrade --install --wait --namespace "$(inputs.params.releaseNamespace)" \
-          --version $(inputs.params.releaseVersion) $(inputs.params.releaseName) $(inputs.params.chartsDirectory) --debug --set "$(inputs.params.overwriteValues)"
+        echo Installing Helm chart for resource with tag $(inputs.params.overwriteValues) and name $(inputs.params.releaseName)
+        helm upgrade --install --wait --timeout $(inputs.params.timeout) --namespace "$(inputs.params.releaseNamespace)" \
+          $(inputs.params.releaseName) $(inputs.params.chartsDirectory) --debug --set "$(inputs.params.overwriteValues)"

@@ -46,7 +46,7 @@ spec:
       modulePath=$(params.modulePath)
       tag=$(gradle -q $modulePath:printVersion) 
       # Runs tests and the Gradle Jib build.
-      gradle $modulePath:test $modulePath:jib \
+      gradle $modulePath:jib $modulePath:test \
         --tests $(params.testsFilter) \
         --stacktrace --console=plain \
         --gradle-user-home=$HOME/.gradle \

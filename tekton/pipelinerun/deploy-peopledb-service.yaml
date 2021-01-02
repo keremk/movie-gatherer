@@ -1,0 +1,13 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: deploy-peopledb-pipeline-run
+  namespace: movie-store
+spec:
+  serviceAccountName: deploy-pipeline-run-sa
+  pipelineRef:
+    name: deploy-peopledb-pipeline
+  workspaces:
+    - name: shared-workspace
+      persistentvolumeclaim:
+        claimName: deploy-peopledb-pvc

@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: deploy-moviedb-pvc
+  name: deploy-moviesdb-pvc
   namespace: movie-store
 spec:
   accessModes:

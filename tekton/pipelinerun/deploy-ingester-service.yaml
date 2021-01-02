@@ -1,0 +1,13 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: deploy-ingester-pipeline-run-
+  namespace: movie-store
+spec:
+  serviceAccountName: deploy-pipeline-run-sa
+  pipelineRef:
+    name: deploy-ingester-pipeline
+  workspaces:
+    - name: shared-workspace
+      persistentvolumeclaim:
+        claimName: deploy-ingester-pvc

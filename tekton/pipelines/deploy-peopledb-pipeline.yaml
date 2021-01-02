@@ -34,7 +34,7 @@ spec:
     - name: flywayUser
       value: peopleservice
     - name: flywayPassword
-      value: postgres-peopledb-password
+      value: postgres-peopledb
     - name: flywayJdbcUrl
       value: "jdbc:postgresql://192.168.1.78:5432/people"
   - name: create-image
@@ -69,17 +69,5 @@ spec:
       value: "imageTag=$(tasks.create-image.results.tag)"
     - name: releaseNamespace
       value: "movie-store"
----
-apiVersion: tekton.dev/v1beta1
-kind: PipelineRun
-metadata:
-  name: deploy-peopledb-pipeline-run
-  namespace: movie-store
-spec:
-  serviceAccountName: deploy-pipeline-run-sa
-  pipelineRef:
-    name: deploy-peopledb-pipeline
-  workspaces:
-    - name: shared-workspace
-      persistentvolumeclaim:
-        claimName: deploy-peopledb-pvc
+    - name: releaseName
+      value: "peopledb-service"

@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: deploy-moviedb-pipeline
+  name: deploy-moviesdb-pipeline
   namespace: movie-store
 spec:
   workspaces:
@@ -30,11 +30,11 @@ spec:
       workspace: shared-workspace
     params:
     - name: modulePath
-      value: ":modules:moviedb:"  
+      value: ":modules:moviesdb:"  
     - name: flywayUser
       value: movieservice
     - name: flywayPassword
-      value: postgres-moviedb-password
+      value: postgres-moviesdb
     - name: flywayJdbcUrl
       value: "jdbc:postgresql://192.168.1.78:5432/movies"
   - name: create-image
@@ -47,11 +47,11 @@ spec:
       workspace: shared-workspace
     params:
     - name: imageUrl
-      value: "192.168.1.78:32000/moviedb"
+      value: "192.168.1.78:32000/moviesdb"
     - name: insecureRegistry
       value: "true"
     - name: modulePath
-      value: ":modules:moviedb:"  
+      value: ":modules:moviesdb:"  
     - name: testsFilter
       value: "com.codingventures.movies.moviesdb.tests.unit*"
   - name: deploy
@@ -64,22 +64,10 @@ spec:
       workspace: shared-workspace
     params:
     - name: chartsDirectory
-      value: "./helm/movie-gatherer/charts/moviedb"
+      value: "./helm/movie-gatherer/charts/moviesdb"
     - name: overwriteValues
       value: "imageTag=$(tasks.create-image.results.tag)"
     - name: releaseNamespace
       value: "movie-store"
----
-apiVersion: tekton.dev/v1beta1
-kind: PipelineRun
-metadata:
-  name: deploy-ingester-pipeline-run
-  namespace: movie-store
-spec:
-  serviceAccountName: deploy-pipeline-run-sa
-  pipelineRef:
-    name: deploy-ingester-pipeline
-  workspaces:
-    - name: shared-workspace
-      persistentvolumeclaim:
-        claimName: deploy-ingester-pvc
+    - name: releaseName
+      value: "moviesdb-service"

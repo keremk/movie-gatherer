@@ -29,6 +29,7 @@ spec:
     description: JDBC Url for the database for flyway migration.
     default: ""
   - name: flywayPassword
+    type: string
     description: The secret resource name that has the database password for flyway migration
     default: ""
   workspaces:
@@ -43,6 +44,7 @@ spec:
       echo "Flyway migration running"
       echo "User: " $FLYWAY_USER
       echo "Pass: " $FLYWAY_PASSWORD
+      echo "Password Resource: " $(params.flywayPassword)
       echo "JDBC Url: " $FLYWAY_URL
       gradle $modulePath:flywayMigrate \
         --stacktrace --console=plain \

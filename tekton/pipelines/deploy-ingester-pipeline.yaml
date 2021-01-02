@@ -35,6 +35,8 @@ spec:
       value: "true"
     - name: modulePath
       value: ":modules:ingester:"  
+    - name: testsFilter
+      value: "com.codingventures.movies.ingester.tests.unit*"
   - name: deploy
     taskRef:
       name: helm-upgrade-from-source
@@ -50,17 +52,5 @@ spec:
       value: "imageTag=$(tasks.create-image.results.tag)"
     - name: releaseNamespace
       value: "movie-store"
----
-apiVersion: tekton.dev/v1beta1
-kind: PipelineRun
-metadata:
-  name: deploy-ingester-pipeline-run
-  namespace: movie-store
-spec:
-  serviceAccountName: deploy-pipeline-run-sa
-  pipelineRef:
-    name: deploy-ingester-pipeline
-  workspaces:
-    - name: shared-workspace
-      persistentvolumeclaim:
-        claimName: deploy-ingester-pvc
+    - name: releaseName
+      value: "ingester-service"    
