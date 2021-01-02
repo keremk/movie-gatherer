@@ -9,7 +9,7 @@ data:
   maxPollRecords: {{ quote .Values.kafka.maxPollRecords }}
   consumerGroupId: {{ .Values.kafka.consumerGroupId }}
   enableAutoCommit: {{ quote .Values.kafka.enableAutoCommit }}
-  moviesTopic: {{ .Values.topics.movies }}
+  peopleTopic: {{ .Values.topics.people }}
   deadLettersTopic: {{ .Values.topics.deadLetters }}
   pgHost: {{ quote .Values.postgres.host }}
   pgPort: {{ quote .Values.postgres.port }}

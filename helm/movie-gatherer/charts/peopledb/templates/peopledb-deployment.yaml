@@ -48,7 +48,7 @@ spec:
           valueFrom:
             configMapKeyRef:
               name: peopledb-config
-              key: moviesTopic
+              key: peopleTopic
         - name: PEOPLEDB_DEADLETTERS_TOPIC
           valueFrom:
             configMapKeyRef:
