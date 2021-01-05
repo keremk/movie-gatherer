@@ -14,7 +14,7 @@ import com.codingventures.movies.ingester.remote.tmdb.response.Genre as GenreRes
 fun mapMovieResponseToMovieDetails(response: MovieDetailsResponse): MovieDetails {
     return MovieDetails(
         movieUrn = createMovieUrn(response.tmdbId),
-        externalUrns = listOf(
+        externalUrns = listOfNotNull(
             createTMDBMovieUrn(response.tmdbId),
             createIMDBMovieUrn(response.imdbId)
         ),

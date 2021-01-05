@@ -12,22 +12,6 @@ object UrnSerializer : KSerializer<Urn> {
         encoder.encodeString(value.toString())
     }
 
-    override fun deserialize(decoder: Decoder): Urn {
-        val urnString = decoder.decodeString()
-        val parts = urnString.split(":")
-        if (parts.count() < 3) {
-            throw MalformedUrnException("Text '$urnString' is an unknown urn format")
-        }
-
-        if (parts[0].isEmpty() || parts[1].isEmpty() || parts[2].isEmpty()) {
-            throw MalformedUrnException("Text '$urnString' is missing some fields")
-        }
-
-        return Urn(
-            org = parts[0],
-            type = parts[1],
-            id = parts[2]
-        )
-    }
+    override fun deserialize(decoder: Decoder): Urn = Urn.fromString(decoder.decodeString())
 }
 

@@ -3,9 +3,9 @@ imageTag: "0"
 replicaCount: 1
 tmdb:
     hostname: api.themoviedb.org
-    maxNoPages: 1000
-    maxNoCrewRequests: 500
-    maxNoCastRequests: 500
+    maxNoPages: 100
+    maxNoCrewRequests: 30
+    maxNoCastRequests: 50
 kafka: 
     maxPollRecords: 100
     consumerGroupId: movies-ingester

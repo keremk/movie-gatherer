@@ -9,7 +9,7 @@ import java.time.format.DateTimeFormatter
 fun mapPersonResponseToPersonDetails(response: PersonDetailsResponse): PersonDetails {
     return PersonDetails(
         personUrn = createPersonUrn(response.id),
-        externalUrns = listOf(
+        externalUrns = listOfNotNull(
             createTMDBPersonUrn(response.id),
             createIMDBPersonUrn(response.imdbId)
         ),
