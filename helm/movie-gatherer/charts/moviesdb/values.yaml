@@ -2,7 +2,7 @@ imageRegistry: "localhost:32000"
 imageTag: "0"
 replicaCount: 1
 kafka: 
-    maxPollRecords: 100
+    maxPollRecords: 20
     consumerGroupId: moviesdb
     enableAutoCommit: false
     bootstrapServers: "PLAINTEXT://kafka.movie-store:9092"
