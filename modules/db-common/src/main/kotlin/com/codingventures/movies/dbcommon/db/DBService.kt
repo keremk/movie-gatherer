@@ -10,6 +10,7 @@ import io.vertx.sqlclient.Row
 import io.vertx.sqlclient.RowSet
 import io.vertx.sqlclient.Transaction
 import mu.KotlinLogging
+import java.lang.IllegalStateException
 
 private val logger = KotlinLogging.logger {}
 
@@ -31,7 +32,12 @@ class DBService(private val pgClient: PgPool) {
     private suspend fun executeStatement(tx: Transaction, statement: StatementDeclaration): RowSet<Row> {
         val batch = statement.batchData.map { Tuple.tuple(it) }
         val result = tx.preparedQuery(statement.insertStatement).executeBatchAwait(batch)
-        logger.info { "${result.value()} is inserted" }
+        if (result == null) {
+            logger.error { "${statement.batchData} can not be inserted" }
+            throw IllegalStateException()
+        } else {
+            logger.info { "${result.value()} is inserted" }
+        }
         return result
     }
 
