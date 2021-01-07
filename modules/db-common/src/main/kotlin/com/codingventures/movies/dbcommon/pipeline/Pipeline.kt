@@ -103,6 +103,8 @@ class Pipeline<T : MovieIndustryData>(
             dbService.insert(input.first)
         } catch (e: PgException) {
             throw PipelineStageException(Reason.PersistenceFailure, input.second, e)
+        } catch (e: java.lang.Exception) {
+            throw PipelineStageException(Reason.PersistenceFailure, input.second, e)
         }
     }
 
