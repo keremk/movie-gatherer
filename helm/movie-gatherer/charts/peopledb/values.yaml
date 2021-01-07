@@ -4,7 +4,7 @@ replicaCount: 1
 kafka: 
     maxPollRecords: 20
     consumerGroupId: peopledb
-    enableAutoCommit: false
+    enableAutoCommit: true
     bootstrapServers: "PLAINTEXT://kafka.movie-store:9092"
     schemaRegistryUrl: "http://schemas.movie-store:8081"
 topics:
