@@ -23,17 +23,15 @@ class DBService(private val pgClient: PgPool) {
         }
 
         val tx = pgClient.beginAwait()
-        val results = statements.map { executeStatement(tx, it) }
+        val results = statements
+            .filter { it.batchData.isNotEmpty() }
+            .map { executeStatement(tx, it) }
         tx.commitAwait()
 
         return results
     }
 
     private suspend fun executeStatement(tx: Transaction, statement: StatementDeclaration): RowSet<Row> {
-        if (statement.batchData.isEmpty()) {
-            throw IllegalStateException()
-        }
-        
         val batch = statement.batchData.map { Tuple.tuple(it) }
         val result = tx.preparedQuery(statement.insertStatement).executeBatchAwait(batch)
         if (result == null) {
