@@ -15,7 +15,7 @@ import com.codingventures.movies.ingester.remote.tmdb.fetchers.TmdbClient
 import com.codingventures.movies.ingester.remote.tmdb.response.TmdbResponse
 import com.codingventures.movies.kafka.KafkaConfigProvider
 import com.codingventures.movies.kafka.KafkaRunner
-import com.sksamuel.avro4k.Avro
+import com.github.avrokotlin.avro4k.Avro
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.features.ServerResponseException

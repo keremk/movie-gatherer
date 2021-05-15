@@ -30,7 +30,7 @@ dependencies {
     kapt(project(":modules:db-processor"))
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:$kotlinxSerializationVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinxSerializationVersion")
     implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
     implementation("io.vertx:vertx-pg-client:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
@@ -39,7 +39,7 @@ dependencies {
 
     testImplementation("io.confluent:kafka-avro-serializer:${avroSerializerVersion}")
     testImplementation("org.apache.kafka:kafka-clients:${kafkaVersion}")
-    testImplementation("com.sksamuel.avro4k:avro4k-core:${avro4kVersion}")
+    testImplementation("com.github.avro-kotlin.avro4k:avro4k-core:${avro4kVersion}")
 
     testImplementation(project(":modules:tests-common"))
     testImplementation("org.flywaydb:flyway-core:${flywayVersion}")

@@ -11,11 +11,11 @@ dependencies {
     implementation(project(":modules:kafka-common"))
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${coroutinesVersion}")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:${kotlinxSerializationVersion}")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${kotlinxSerializationVersion}")
     implementation("io.confluent:kafka-avro-serializer:${avroSerializerVersion}")
     implementation("com.sksamuel.hoplite:hoplite-core:${hopliteVersion}")
     implementation("com.sksamuel.hoplite:hoplite-yaml:${hopliteVersion}")
-    implementation("com.sksamuel.avro4k:avro4k-core:${avro4kVersion}")
+    implementation("com.github.avro-kotlin.avro4k:avro4k-core:${avro4kVersion}")
     implementation("io.vertx:vertx-lang-kotlin:${vertxVersion}")
     implementation("io.vertx:vertx-pg-client:${vertxVersion}")
     implementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")

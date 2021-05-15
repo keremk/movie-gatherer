@@ -11,7 +11,7 @@ import dependencies.kotestVersion
 
 plugins {
     kotlin("jvm") apply false
-    kotlin("kapt") version "1.3.72" apply false
+    kotlin("kapt") version "1.4.32" apply false
     id("org.jetbrains.kotlin.plugin.serialization") apply false
     id("com.google.cloud.tools.jib") version "2.4.0" apply false
     id("org.flywaydb.flyway") version "6.5.3" apply false

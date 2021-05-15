@@ -6,7 +6,7 @@ import com.codingventures.movies.dbcommon.utils.bufferTimeout
 import com.codingventures.movies.domain.MovieIndustryData
 import com.codingventures.movies.kafka.KafkaConfigProvider
 import com.codingventures.movies.kafka.KafkaRunner
-import com.sksamuel.avro4k.Avro
+import com.github.avrokotlin.avro4k.Avro
 import io.vertx.kotlin.pgclient.pgConnectOptionsOf
 import io.vertx.kotlin.sqlclient.*
 import io.vertx.pgclient.PgException

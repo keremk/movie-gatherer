@@ -16,10 +16,10 @@ dependencies {
     implementation("io.ktor:ktor-client-cio:${ktorVersion}")
     implementation("io.ktor:ktor-client-serialization-jvm:${ktorVersion}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${coroutinesVersion}")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:${kotlinxSerializationVersion}")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${kotlinxSerializationVersion}")
 
     implementation("com.github.ajalt:clikt:$cliktVersion")
-    implementation("com.sksamuel.avro4k:avro4k-core:$avro4kVersion")
+    implementation("com.github.avro-kotlin.avro4k:avro4k-core:$avro4kVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${coroutinesVersion}")
 }
 
